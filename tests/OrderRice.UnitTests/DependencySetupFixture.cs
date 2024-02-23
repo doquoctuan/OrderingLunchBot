@@ -16,7 +16,7 @@ namespace OrderRice.UnitTests
             {
                 if (_config == null)
                 {
-                    var builder = new ConfigurationBuilder().AddJsonFile($"local.settings.json", optional: true);
+                    var builder = new ConfigurationBuilder().AddJsonFile($"local.settings.json", optional: false);
                     _config = builder.Build();
                 }
 
@@ -60,6 +60,8 @@ namespace OrderRice.UnitTests
 
             serviceCollection.AddTransient<AuthTokenHandler>();
             serviceCollection.Decorate<IGoogleAuthService, CachedGoogleAuthService>();
+
+            serviceCollection.AddSingleton<Constants>();
 
             ServiceProvider = serviceCollection.BuildServiceProvider();
         }
