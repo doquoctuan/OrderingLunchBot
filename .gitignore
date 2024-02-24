@@ -485,3 +485,5 @@ $RECYCLE.BIN/
 
 ServiceDependencies
 serviceDependencies*
+
+*local.settings.json
