@@ -11,11 +11,13 @@ namespace OrderRice.Services
     {
         private readonly HttpClient _client;
         private readonly IConfiguration _configuration;
+        private readonly Constants _constants;
 
-        public GoogleAuthService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public GoogleAuthService(IHttpClientFactory httpClientFactory, IConfiguration configuration, Constants constants)
         {
             _client = httpClientFactory.CreateClient("google_auth_client");
             _configuration = configuration;
+            _constants = constants;
         }
 
         public async Task<string> GetAccessTokenFromRefreshTokenAsync(CancellationToken cancellationToken)
@@ -54,6 +56,7 @@ namespace OrderRice.Services
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
             var tokenResponse = JsonConvert.DeserializeObject<GoogleAuthResponseModel>(content, settings);
 
+            _constants.EXPIRES_IN = tokenResponse.ExpiresIn;
             return tokenResponse.AccessToken;
 
         }

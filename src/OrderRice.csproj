@@ -11,6 +11,9 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.13" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.15.1" />
     <PackageReference Include="Scrutor" Version="4.2.2" />
+	<PackageReference Include="SixLabors.Fonts" Version="2.0.0" />
+	<PackageReference Include="SixLabors.ImageSharp" Version="3.0.2" />
+	<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.0.1" />
 	<PackageReference Include="Telegram.Bot" Version="19.0.0" />
   </ItemGroup>
   <ItemGroup>

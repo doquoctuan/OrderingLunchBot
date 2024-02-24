@@ -25,7 +25,7 @@ namespace OrderRice.UnitTests.Services
             var result = await _orderService.CreateOrderListImage();
 
             // Assert
-            Assert.NotEmpty(result.Item1);
+            Assert.NotEmpty(result);
         }
     }
 }
