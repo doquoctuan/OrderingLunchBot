@@ -42,5 +42,5 @@ jobs:
       uses: Azure/functions-action@v1
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-        publish-profile: ${{ secrets.orderlunch_A88A }}
+        publish-profile: ${{ secrets.ORDER_LUNCH_SECRET }}
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
