@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using OrderRice.Interfaces;
+using System.Threading;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace OrderRice.Services
 {
@@ -20,7 +22,6 @@ namespace OrderRice.Services
 
         public async Task HandleMessageAsync(Update update)
         {
-            await _orderService.CreateOrderListImage();
             _logger.LogInformation("Invoke Telegram HandleMessageAsync function");
 
             if (update is null)
@@ -42,7 +43,35 @@ namespace OrderRice.Services
             if (message.Text is not { } messageText)
                 return;
 
-            await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: message.Text);
+            var action = messageText.Split(' ')[0] switch
+            {
+                "/list" or "/list@khay_bot" => SendList(_botClient, _orderService, message),
+                _ => Task.CompletedTask
+            };
+
+            await action;
+
+            static async Task SendList(ITelegramBotClient botClient, IOrderService _orderService, Message message)
+            {
+                var response = await _orderService.CreateOrderListImage();
+
+                if (!response.Any())
+                {
+                    await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Không tìm thấy danh sách đăng ký cơm hôm nay");
+                    return;
+                }
+
+                var albums = response.Select(x =>
+                {
+                    (string urlImage, string nameImage) = x;
+                    return new InputMediaPhoto(InputFile.FromUri(urlImage))
+                    {
+                        Caption = nameImage
+                    };
+                });
+
+                await botClient.SendMediaGroupAsync(message.Chat.Id, media: albums);
+            }
         }
 
         private Task UnknownHandlerAsync(Update update)

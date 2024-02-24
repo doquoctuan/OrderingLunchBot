@@ -28,11 +28,11 @@ namespace OrderRice.Functions
             {
                 var body = await request.ReadAsStringAsync() ?? throw new ArgumentNullException(nameof(request));
                 var update = JsonConvert.DeserializeObject<Update>(body);
-                //if (update is null)
-                //{
-                //    _logger.LogWarning("Unable to deserialize Update object.");
-                //    return response;
-                //}
+                if (update is null)
+                {
+                    _logger.LogWarning("Unable to deserialize Update object.");
+                    return response;
+                }
 
                 await _updateService.HandleMessageAsync(update);
             }
