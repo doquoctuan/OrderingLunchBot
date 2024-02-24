@@ -2,7 +2,7 @@ name: Build and deploy
 on:
   push:
     branches:
-    - develop
+    - master
 env:
   AZURE_FUNCTIONAPP_NAME: orderlunch
   AZURE_FUNCTIONAPP_PACKAGE_PATH: src/published
