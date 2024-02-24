@@ -1,39 +1,47 @@
-name: Deployment
-
-env:
-  DOTNET_VERSION: '6'
-  
+name: Build and deploy
 on:
-  pull_request:
-    branches: [ "master" ]
-
+  push:
+    branches:
+    - master
+env:
+  AZURE_FUNCTIONAPP_NAME: orderlunch
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: src/published
+  CONFIGURATION: Release
+  DOTNET_CORE_VERSION: 6.0.x
+  WORKING_DIRECTORY: src
 jobs:
   build:
-  
     runs-on: ubuntu-latest
-    
     steps:
-    - name: 🚚 Get latest code
-      uses: actions/checkout@v3
-
-    - name: Set up .NET 
+    - uses: actions/checkout@v4
+    - name: Setup .NET SDK
       uses: actions/setup-dotnet@v3
-      with: 
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-
-    - name: Restore Nuget packages
-      run: dotnet restore
-
-    - name: Build Project
-      run: dotnet build --no-restore
-
+      with:
+        dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+    - name: Restore
+      run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
+    - name: Build
+      run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
     - name: Publish
-      run: dotnet publish -c release --output ./release
-    
-    # - name: 💥 Deploy
-    #   uses: Samkirkland/FTP-Deploy-Action@v4.3.4
-    #   with:
-    #         local-dir: 'release/'
-    #         server: ${{ secrets.FTP_SERVER }}
-    #         username: ${{ secrets.FTP_USERNAME }}
-    #         password: ${{ secrets.FTP_PASSWORD }}
+      run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}"
+    - name: Publish Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: functionapp
+        path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v3
+      with:
+        name: functionapp
+        path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+    - name: Deploy to Azure Function App
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        slot-name: 'Production'
+        publish-profile: ${{ secrets.ORDER_LUNCH_SECRET }}
+        package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}

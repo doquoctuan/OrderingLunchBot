@@ -8,7 +8,6 @@ namespace OrderRice.Services
         private readonly IGoogleAuthService _authService;
         private readonly ILogger<CachedGoogleAuthService> _logger;
         private readonly Constants _constants;
-        private const int EXPIRES_IN = 3599;
 
         public CachedGoogleAuthService(IGoogleAuthService authService, ILogger<CachedGoogleAuthService> logger, Constants constants)
         {
@@ -19,19 +18,20 @@ namespace OrderRice.Services
 
         public async Task<string> GetAccessTokenFromRefreshTokenAsync(CancellationToken cancellationToken)
         {
-            if (IsExpriedAccessToken())
+            (string accessToken, double createDate) = _constants.AccessToken;
+            if (!IsExpriedAccessToken(createDate))
             {
-                return _constants.AccessToken.Item1;
+                return accessToken;
             }
-            _logger.LogInformation("Access token expired.");
+            _logger.LogInformation("Renew access token");
             var token = await _authService.GetAccessTokenFromRefreshTokenAsync(cancellationToken);
             _constants.AccessToken = new(token, DateTime.Now.TimeOfDay.TotalSeconds);
             return token;
         }
 
-        private bool IsExpriedAccessToken()
+        private bool IsExpriedAccessToken(double createDate)
         {
-            return _constants.AccessToken.Item2 + EXPIRES_IN > DateTime.Now.TimeOfDay.TotalSeconds;
+            return createDate + _constants.EXPIRES_IN < DateTime.Now.TimeOfDay.TotalSeconds;
         }
     }
 }
