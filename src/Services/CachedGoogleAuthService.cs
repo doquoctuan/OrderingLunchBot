@@ -19,7 +19,7 @@ namespace OrderRice.Services
         public async Task<string> GetAccessTokenFromRefreshTokenAsync(CancellationToken cancellationToken)
         {
             (string accessToken, double createDate) = _constants.AccessToken;
-            if (!IsExpriedAccessToken(createDate))
+            if (!string.IsNullOrEmpty(accessToken) && !IsExpriedAccessToken(createDate))
             {
                 return accessToken;
             }
