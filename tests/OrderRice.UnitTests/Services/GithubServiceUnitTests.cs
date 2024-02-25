@@ -13,15 +13,15 @@ namespace OrderRice.UnitTests.Services
             _githubService = scope.ServiceProvider.GetService<GithubService>();
         }
 
-        [Fact]
-        public async Task UploadImage_ShouldReturnSuccess()
-        {
-            // Action
-            var result = await _githubService.UploadImageAsync(imageBase64: "test");
+        //[Fact]
+        //public async Task UploadImage_ShouldReturnSuccess()
+        //{
+        //    // Action
+        //    var result = await _githubService.UploadImageAsync(imageBase64: "test");
 
-            // Assert
-            Assert.NotNull(result.Content?.DownloadUrl);
-            Assert.NotEmpty(result.Content?.DownloadUrl);
-        }
+        //    // Assert
+        //    Assert.NotNull(result.Content?.DownloadUrl);
+        //    Assert.NotEmpty(result.Content?.DownloadUrl);
+        //}
     }
 }

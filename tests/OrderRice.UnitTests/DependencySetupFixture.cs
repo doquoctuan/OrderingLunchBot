@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
+using OrderRice.Extentions;
 using OrderRice.Interfaces;
 using OrderRice.Services;
 using Telegram.Bot;
@@ -52,9 +52,12 @@ namespace OrderRice.UnitTests
                 c.BaseAddress = new Uri("https://sheets.googleapis.com");
             }).AddHttpMessageHandler<AuthTokenHandler>();
 
+            // Add Persistence
+            PersistenceExtention.AddPersistence(serviceCollection);
+
             // Add business-logic service
             serviceCollection.AddScoped<IGoogleAuthService, GoogleAuthService>();
-            serviceCollection.AddScoped<TelegramService>();
+            serviceCollection.AddScoped<UpdateService>();
             serviceCollection.AddScoped<GithubService>();
             serviceCollection.AddScoped<IOrderService, OrderService>();
 

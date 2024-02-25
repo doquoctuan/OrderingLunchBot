@@ -1,7 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderRice;
+using OrderRice.Extentions;
 using OrderRice.Interfaces;
+using OrderRice.Middlewares;
 using OrderRice.Services;
 using Telegram.Bot;
 
@@ -15,7 +17,16 @@ var githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN", Environment
     ?? throw new ArgumentException("Can not get githubToken. Set githubToken in environment setting");
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults()
+    .ConfigureFunctionsWorkerDefaults(workerApplication =>
+    {
+        workerApplication.UseWhen<TelegramAuthenticationMiddleware>((context) =>
+        {
+            // We want to use this middleware only for http trigger invocations.
+            return context.FunctionDefinition.Name.Equals("TelegramWebhook")
+                && context.FunctionDefinition.InputBindings.Values
+                          .First(a => a.Type.EndsWith("Trigger")).Type == "httpTrigger";
+        });
+    })
     .ConfigureServices(serviceCollection =>
     {
         serviceCollection.AddHttpClient("telegram_client")
@@ -39,9 +50,12 @@ var host = new HostBuilder()
             c.BaseAddress = new Uri("https://sheets.googleapis.com");
         }).AddHttpMessageHandler<AuthTokenHandler>();
 
+        // Add Persistence
+        // serviceCollection.AddPersistence();
+
         // Add business-logic service
         serviceCollection.AddScoped<IGoogleAuthService, GoogleAuthService>();
-        serviceCollection.AddScoped<TelegramService>();
+        serviceCollection.AddScoped<UpdateService>();
         serviceCollection.AddScoped<GithubService>();
         serviceCollection.AddScoped<IOrderService, OrderService>();
 
