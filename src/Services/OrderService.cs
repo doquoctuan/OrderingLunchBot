@@ -95,6 +95,11 @@ namespace OrderRice.Services
         {
             static void AddList(List<string> floor16, List<string> floor19, string name)
             {
+                if (BlackLists.Set.Contains(name))
+                {
+                    return;
+                }
+
                 if (name.Contains("19"))
                 {
                     floor19.Add(name);
