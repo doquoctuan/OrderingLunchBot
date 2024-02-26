@@ -51,7 +51,7 @@ var host = new HostBuilder()
         }).AddHttpMessageHandler<AuthTokenHandler>();
 
         // Add Persistence
-        // serviceCollection.AddPersistence();
+        serviceCollection.AddPersistence();
 
         // Add business-logic service
         serviceCollection.AddScoped<IGoogleAuthService, GoogleAuthService>();

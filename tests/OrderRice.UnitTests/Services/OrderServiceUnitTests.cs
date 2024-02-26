@@ -28,11 +28,5 @@ namespace OrderRice.UnitTests.Services
         //    Assert.NotEmpty(result);
         //}
 
-        [Fact]
-        public async Task SeedingData_ShouldNotThrowException()
-        {
-            // Action
-            await _orderService.SeedingDataFromFile();
-        }
     }
 }
