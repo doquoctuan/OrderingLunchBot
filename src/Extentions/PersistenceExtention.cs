@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OrderRice.Interfaces;
 using OrderRice.Persistence;
+using OrderRice.Services;
 
 namespace OrderRice.Extentions
 {
@@ -19,11 +21,15 @@ namespace OrderRice.Extentions
                 options.UseCosmos(cosmosDbEndpoint, accountKey, databaseName: "OrderLunchDb");
             });
 
-            using var client = new CosmosClient(cosmosDbEndpoint, accountKey);
-            var db = client.CreateDatabaseIfNotExistsAsync("OrderLunchDb").GetAwaiter().GetResult();
-            var container = db.Database.CreateContainerIfNotExistsAsync("Users", "/Users").GetAwaiter().GetResult();
+            //using var client = new CosmosClient(cosmosDbEndpoint, accountKey);
+            //var db = client.CreateDatabaseIfNotExistsAsync("OrderLunchDb").GetAwaiter().GetResult();
+            //var container = db.Database.CreateContainerIfNotExistsAsync("Users", "/username").GetAwaiter().GetResult();
 
-            // services.AddScoped(provider => provider.GetService<OrderLunchDbContext>());
+            services.AddScoped<DbContext>(provider => provider.GetService<OrderLunchDbContext>());
+            services.AddTransient<IUserService, UserService>();
+
+            serviceProvider = services.BuildServiceProvider();
+            OrderLunchDbContextSeed.SeedDataFromGoogleSheetAsync(serviceProvider.GetService<OrderLunchDbContext>());
 
             return services;
         }

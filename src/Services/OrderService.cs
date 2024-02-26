@@ -253,28 +253,5 @@ namespace OrderRice.Services
                 return new (!datas[1][index].Equals("v", StringComparison.OrdinalIgnoreCase) && !datas[2][index].Equals("0"), datas[0][index]);
             }
         }
-
-        private List<Users> SeedData()
-        {
-            var list = new List<Users>
-            {
-                new() {
-                    Id = Guid.NewGuid(),
-                    UserName = "tuandq16",
-                    FullName = "Đỗ Quốc Tuấn",
-                }
-            };
-            return list;
-        }
-
-        public async Task SeedingDataFromFile()
-        {
-            using var context = new OrderLunchDbContext();
-            await context.Database.EnsureDeletedAsync();
-            await context.Database.EnsureCreatedAsync();
-
-            context.Users.AddRange(SeedData());
-            await context.SaveChangesAsync();
-        }
     }
 }
