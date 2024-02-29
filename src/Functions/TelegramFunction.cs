@@ -12,6 +12,7 @@ namespace OrderRice.Functions
     {
         private readonly ILogger<TelegramFunction> _logger;
         private readonly UpdateService _updateService;
+        private const long DEVELOPMENT_DEPARMENT_ID = -1001286076862;
 
         public TelegramFunction(ILogger<TelegramFunction> logger, UpdateService updateService)
         {
@@ -19,21 +20,14 @@ namespace OrderRice.Functions
             _updateService = updateService;
         }
 
-        [Function(nameof(ManualTrigger))]
-        public async Task<HttpResponseData> ManualTrigger([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData request)
+        [Function(nameof(Run))]
+        public async Task Run([TimerTrigger("30 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
-            var response = request.CreateResponse(HttpStatusCode.OK);
-            var chatId = request.Query["chatId"];
-            if (string.IsNullOrEmpty(chatId) || !long.TryParse(chatId, out long parseLongId))
-            {
-                return request.CreateResponse(HttpStatusCode.BadRequest);
-            }
             Update update = new()
             {
-                Message = new() { Text = "/list", Chat = new() { Id = parseLongId, Username = "cronjob" } }
+                Message = new() { Text = "/list", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
             };
             await _updateService.HandleMessageAsync(update);
-            return response;
         }
 
         [Function(nameof(TelegramWebhook))]

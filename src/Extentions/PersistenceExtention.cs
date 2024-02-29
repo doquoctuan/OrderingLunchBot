@@ -1,7 +1,9 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using Google.Apis.Sheets.v4;
+using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OrderRice.Helper;
 using OrderRice.Interfaces;
 using OrderRice.Persistence;
 using OrderRice.Services;
@@ -28,8 +30,10 @@ namespace OrderRice.Extentions
             services.AddScoped<DbContext>(provider => provider.GetService<OrderLunchDbContext>());
             services.AddTransient<IUserService, UserService>();
 
-            serviceProvider = services.BuildServiceProvider();
-            OrderLunchDbContextSeed.SeedDataFromGoogleSheetAsync(serviceProvider.GetService<OrderLunchDbContext>());
+            // serviceProvider = services.BuildServiceProvider();
+
+            // SpreadsheetsResource.ValuesResource googleSheetsHelper = serviceProvider.GetService<GoogleSheetsHelper>().Service.Spreadsheets.Values;
+            // OrderLunchDbContextSeed.SeedDataFromGoogleSheetAsync(serviceProvider.GetService<OrderLunchDbContext>(), googleSheetsHelper);
 
             return services;
         }

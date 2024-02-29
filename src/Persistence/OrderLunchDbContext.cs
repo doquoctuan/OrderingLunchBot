@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OrderRice.Entities;
-using OrderRice.Extentions;
 
 namespace OrderRice.Persistence
 {

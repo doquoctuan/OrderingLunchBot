@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using OrderRice.Entities;
 using OrderRice.Exceptions;
 using OrderRice.Interfaces;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -11,12 +14,14 @@ namespace OrderRice.Services
         private readonly ITelegramBotClient _botClient;
         private readonly ILogger<UpdateService> _logger;
         private readonly IOrderService _orderService;
+        private readonly IUserService _userService;
 
-        public UpdateService(ITelegramBotClient botClient, ILogger<UpdateService> logger, IOrderService orderService)
+        public UpdateService(ITelegramBotClient botClient, ILogger<UpdateService> logger, IOrderService orderService, IUserService userService)
         {
             _botClient = botClient;
             _logger = logger;
             _orderService = orderService;
+            _userService = userService;
         }
 
         public async Task HandleMessageAsync(Update update)
@@ -44,9 +49,20 @@ namespace OrderRice.Services
                 if (message.Text is not { } messageText)
                     return;
 
-                var action = messageText.Split(' ')[0] switch
+                (string command, string text) = SeparateTelegramMessage(messageText);
+
+                (bool isExist, Users user) = IsExists(message.Chat.Id, text);
+
+                if (!isExist && !message.Chat.Username.Equals("cronjob"))
                 {
-                    "/list" or "/list@khaykhay_bot" => SendList(_botClient, _orderService, message),
+                    await _botClient.SendTextMessageAsync(message.Chat.Id, "Để bắt đầu, vui lòng cho biết bạn là ai\nSử dụng lệnh /set {username}");
+                    return;
+                }
+
+                var action = command switch
+                {
+                    "list" or "list@pt_gpmn_bot" => SendList(_botClient, _orderService, message),
+                    "set" or "set@pt_gpmn_bot" => UpdateUserInfo(_botClient, _userService, user, message.Chat.Id),
                     _ => Task.CompletedTask
                 };
 
@@ -87,11 +103,26 @@ namespace OrderRice.Services
                 });
 
                 await botClient.SendMediaGroupAsync(message.Chat.Id, media: albums);
+
                 if (message.Chat is { Username : "cronjob" })
                 {
-                    await botClient.SendTextMessageAsync(message.Chat.Id, string.IsNullOrEmpty(user16) ? "Tầng 16 không ai đặt phiếu ăn" : $"Đồng chí {user16} lấy phiếu cơm tầng 16");
-                    await botClient.SendTextMessageAsync(message.Chat.Id, string.IsNullOrEmpty(user19) ? "Tầng 19 không ai đặt phiếu ăn" : $"Đồng chí {user19} lấy phiếu cơm tầng 19");
+                    if (!string.IsNullOrEmpty(user16))
+                    {
+                        await botClient.SendTextMessageAsync(message.Chat.Id, $"Đồng chí {user16} lấy phiếu cơm tầng 16");
+                    }
+                    if (!string.IsNullOrEmpty(user19))
+                    {
+                        await botClient.SendTextMessageAsync(message.Chat.Id, $"Đồng chí {user19} lấy phiếu cơm tầng 19");
+                    }
                 }
+            }
+
+            static async Task UpdateUserInfo(ITelegramBotClient botClient, IUserService userService, Users user, long chatId)
+            {
+                user.TelegramId = chatId;
+                user.ModifiedDate = DateTime.Now;
+                await userService.UpdateUser(user);
+                await botClient.SendTextMessageAsync(chatId, text: $"Cập nhật thông tin thành công cho đồng chí {user.FullName}");
             }
 
             #endregion
@@ -103,5 +134,28 @@ namespace OrderRice.Services
             _logger.LogInformation("Unknown update type: {UpdateType}", update?.Type);
             return Task.CompletedTask;
         }
+
+        private (bool, Users) IsExists(long telegramId, string messageText)
+        {
+            var users = _userService.FindByFilter(x => x.TelegramId == telegramId || x.UserName == messageText);
+            if ((users is null || !users.Any()))
+            {
+                return new(false, null);
+            }
+            return new(true, users[0]);
+        }
+
+        private (string, string) SeparateTelegramMessage(string telegramMessage)
+        {
+            string pattern = @"^/(\w+)\s*(.*)$";
+            Regex regex = new(pattern);
+            Match match = regex.Match(telegramMessage);
+            if (match.Success)
+            {
+                return new(match.Groups[1].Value, match.Groups[2].Value);
+            }
+            return new(string.Empty, telegramMessage);
+        }
+
     }
 }

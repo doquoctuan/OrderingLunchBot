@@ -75,10 +75,10 @@ namespace OrderRice.Services
         private int GetIndexCurrentDate(List<List<string>> array2D, DateTime dateTime)
         {
             int currentDateItem = 0;
-            //if (dateTime.DayOfWeek is DayOfWeek.Saturday || dateTime.DayOfWeek is DayOfWeek.Sunday)
-            //{
-            //    return currentDateItem;
-            //}
+            if (dateTime.DayOfWeek is DayOfWeek.Saturday || dateTime.DayOfWeek is DayOfWeek.Sunday)
+            {
+                return currentDateItem;
+            }
             var currentDate = dateTime.ToString("dd/MM/yyyy");
             for (int i = 0; i < array2D.Count; i++)
             {
