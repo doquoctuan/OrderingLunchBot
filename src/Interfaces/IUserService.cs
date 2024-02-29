@@ -5,9 +5,10 @@ namespace OrderRice.Interfaces
     public interface IUserService
     {
         List<Users> GetList();
-        Users FindByUserName();
+        Task<Users> FindByUserName(string userName);
+        List<Users> FindByFilter(Func<Users, bool> predicate);
         Task<Users> CreateUser(Users user);
-        Users UpdateUser(Users user);
+        Task<Users> UpdateUser(Users user);
         bool DeleteUser(string userName);
     }
 }

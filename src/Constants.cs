@@ -35,6 +35,8 @@
             "Nguyễn Minh Thông",
             "Nguyễn Văn Lạc",
             "Huỳnh Lê Bảo",
+            "Nguyễn Thanh Vân",
+            "Đỗ Quốc Tuấn",
             "TTS"
         };
     }

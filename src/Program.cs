@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderRice;
 using OrderRice.Extentions;
+using OrderRice.Helper;
 using OrderRice.Interfaces;
 using OrderRice.Middlewares;
 using OrderRice.Services;
@@ -51,6 +52,7 @@ var host = new HostBuilder()
         }).AddHttpMessageHandler<AuthTokenHandler>();
 
         // Add Persistence
+        serviceCollection.AddSingleton(typeof(GoogleSheetsHelper));
         serviceCollection.AddPersistence();
 
         // Add business-logic service
@@ -63,7 +65,7 @@ var host = new HostBuilder()
         serviceCollection.Decorate<IGoogleAuthService, CachedGoogleAuthService>();
 
         serviceCollection.AddSingleton<Constants>();
-
+      
     })
     .Build();
 

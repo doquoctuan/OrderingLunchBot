@@ -30,9 +30,14 @@ namespace OrderRice.Services
             throw new NotImplementedException();
         }
 
-        public Users FindByUserName()
+        public List<Users> FindByFilter(Func<Users, bool> predicate)
         {
-            throw new NotImplementedException();
+            return _dbContext.Users.Where(predicate).ToList();
+        }
+
+        public async Task<Users> FindByUserName(string userName)
+        {
+            return await _dbContext.Users.FindAsync(userName);
         }
 
         public List<Users> GetList()
@@ -40,9 +45,11 @@ namespace OrderRice.Services
             throw new NotImplementedException();
         }
 
-        public Users UpdateUser(Users user)
+        public async Task<Users> UpdateUser(Users user)
         {
-            throw new NotImplementedException();
+            _dbContext.Users.Update(user);
+            await _dbContext.SaveChangesAsync();
+            return user;
         }
     }
 }
