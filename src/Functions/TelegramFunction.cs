@@ -20,15 +20,15 @@ namespace OrderRice.Functions
             _updateService = updateService;
         }
 
-        [Function(nameof(Run))]
-        public async Task Run([TimerTrigger("30 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
-        {
-            Update update = new()
-            {
-                Message = new() { Text = "/list", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
-            };
-            await _updateService.HandleMessageAsync(update);
-        }
+        //[Function(nameof(Run))]
+        //public async Task Run([TimerTrigger("38 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        //{
+        //    Update update = new()
+        //    {
+        //        Message = new() { Text = "/list", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
+        //    };
+        //    await _updateService.HandleMessageAsync(update);
+        //}
 
         [Function(nameof(TelegramWebhook))]
         public async Task<HttpResponseData> TelegramWebhook([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData request)

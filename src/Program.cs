@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderRice;
-using OrderRice.Extentions;
 using OrderRice.Helper;
 using OrderRice.Interfaces;
 using OrderRice.Middlewares;
+using OrderRice.Persistence;
 using OrderRice.Services;
 using Telegram.Bot;
 
@@ -53,7 +53,7 @@ var host = new HostBuilder()
 
         // Add Persistence
         serviceCollection.AddSingleton(typeof(GoogleSheetsHelper));
-        serviceCollection.AddPersistence();
+        serviceCollection.AddScoped(typeof(GoogleSheetContext));
 
         // Add business-logic service
         serviceCollection.AddScoped<IGoogleAuthService, GoogleAuthService>();
@@ -65,7 +65,7 @@ var host = new HostBuilder()
         serviceCollection.Decorate<IGoogleAuthService, CachedGoogleAuthService>();
 
         serviceCollection.AddSingleton<Constants>();
-      
+
     })
     .Build();
 

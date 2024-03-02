@@ -11,14 +11,12 @@ namespace OrderRice.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // CosmosDb specifics
-            modelBuilder.Entity<Users>()
-                        .ToContainer("Users")
-                        .HasPartitionKey(x => x.Department)
-                        .HasKey(o => o.UserName);
+            modelBuilder
+                .Entity<Users>()
+                .ToTable("Users")
+                .HasKey(x => x.UserName);
 
             base.OnModelCreating(modelBuilder);
         }
-
     }
 }

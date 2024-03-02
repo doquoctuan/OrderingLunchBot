@@ -1,4 +1,6 @@
 ﻿using Google.Apis.Sheets.v4;
+using Microsoft.Extensions.Logging;
+using OrderRice.Entities;
 using OrderRice.GoogleSheetModels;
 using OrderRice.Persistence;
 
@@ -11,19 +13,58 @@ namespace OrderRice.Extentions
 
         public static void SeedDataFromGoogleSheetAsync(OrderLunchDbContext context, SpreadsheetsResource.ValuesResource _googleSheetValues)
         {
-            context.Database.EnsureDeleted();
+            Logger("Starting Migrate Database");
             context.Database.EnsureCreated();
 
-            var range = $"{SHEET_NAME}!A2:H";
+            var range = $"{SHEET_NAME}!A2:J";
             var request = _googleSheetValues.Get(SPREADSHEET_ID, range);
             var response = request.Execute();
             var values = response.Values;
 
             var mapperValue = UsersMapper.MapFromRangeData(values);
 
-            context.Users.AddRange(mapperValue);
+            var users = context.Users.ToList();
+
+            bool isAdd;
+
+            foreach (var value in mapperValue)
+            {
+                isAdd = false;
+                Users userModel = users.Find(x => x.UserName == value.UserName);
+                if (userModel is null)
+                {
+                    userModel = new Users
+                    {
+                        UserName = value.UserName,
+                        Department = value.Department
+                    };
+
+                    isAdd = true;
+                }
+                userModel.Birthday = value.Birthday;
+                userModel.DayIn = value.DayIn;
+                userModel.Email = value.Email;
+                userModel.FullName = value.FullName;
+                userModel.IsBlacklist = value.IsBlacklist;
+                userModel.PhoneNumber = value.PhoneNumber;
+
+                if (isAdd)
+                {
+                    context.Users.Add(userModel);
+                }
+            }
+
+            context.Users.UpdateRange(users);
             context.SaveChanges();
 
+            Logger("Migrate Database Successful");
+        }
+
+        private static void Logger(string message)
+        {
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            var logger = loggerFactory.CreateLogger(string.Empty);
+            logger.LogInformation(message);
         }
     }
 }
