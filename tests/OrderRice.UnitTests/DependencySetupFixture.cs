@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderRice.Extentions;
+using OrderRice.Helper;
 using OrderRice.Interfaces;
+using OrderRice.Persistence;
 using OrderRice.Services;
 using Telegram.Bot;
 
@@ -53,7 +55,8 @@ namespace OrderRice.UnitTests
             }).AddHttpMessageHandler<AuthTokenHandler>();
 
             // Add Persistence
-            PersistenceExtention.AddPersistence(serviceCollection);
+            serviceCollection.AddSingleton(typeof(GoogleSheetsHelper));
+            serviceCollection.AddScoped(typeof(GoogleSheetContext));
 
             // Add business-logic service
             serviceCollection.AddScoped<IGoogleAuthService, GoogleAuthService>();

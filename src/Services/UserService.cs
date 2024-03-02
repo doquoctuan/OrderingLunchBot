@@ -1,11 +1,6 @@
 ﻿using OrderRice.Entities;
 using OrderRice.Interfaces;
 using OrderRice.Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OrderRice.Services
 {

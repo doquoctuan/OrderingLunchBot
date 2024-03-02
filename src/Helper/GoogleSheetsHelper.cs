@@ -1,6 +1,8 @@
-﻿using Google.Apis.Auth.OAuth2;
+﻿using Azure.Storage.Blobs;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
+using Microsoft.Extensions.Configuration;
 
 namespace OrderRice.Helper
 {
@@ -9,8 +11,14 @@ namespace OrderRice.Helper
         public SheetsService Service { get; set; }
         const string APPLICATION_NAME = "OrderLunch";
         static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
-        public GoogleSheetsHelper()
+        private readonly string AzBlobStorageConnectionStr;
+        private readonly string ContainnerName;
+        private readonly string FilePath;
+        public GoogleSheetsHelper(IConfiguration configuration)
         {
+            AzBlobStorageConnectionStr = configuration["AzureWebJobsStorage"];
+            ContainnerName = configuration["AzBlobStorage_Container"];
+            FilePath = configuration["AzBlobStorage_PathAuthentication"];
             InitializeService();
         }
         private void InitializeService()
@@ -26,13 +34,18 @@ namespace OrderRice.Helper
         {
             GoogleCredential credential;
 
-            // var binDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            // var rootDirectory = Path.GetFullPath(Path.Combine(binDirectory, ".."));
+            BlobServiceClient blobServiceClient = new(AzBlobStorageConnectionStr);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(ContainnerName);
+            BlobClient blobClient = containerClient.GetBlobClient(FilePath);
 
-            using (var stream = new FileStream("vts-tele-bot-ba9cf7ea28d1.json", FileMode.Open, FileAccess.Read))
+            if (!blobClient.ExistsAsync().Result)
             {
-                credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+                throw new Exception("The file does not exist");
             }
+
+            var response = blobClient.DownloadAsync().Result;
+            credential = GoogleCredential.FromStream(response.Value.Content).CreateScoped(Scopes);
+
             return credential;
         }
     }

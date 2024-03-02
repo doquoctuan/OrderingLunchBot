@@ -9,23 +9,28 @@ namespace OrderRice.GoogleSheetModels
         {
             var items = new List<Users>();
 
+            int i = 1;
             foreach (var value in values)
             {
+                i++;
                 if (!value[1].ToString().Contains("viettel"))
                 {
                     continue;
                 }
+
                 Users item = new()
                 {
-                    Id = Guid.NewGuid(),
+                    RowNum = i,
                     UserName = value[0].ToString(),
                     Email = value[1].ToString(),
                     FullName = value[2].ToString(),
-                    DayIn = DateTime.ParseExact(value[3].ToString(), "mm/dd/yyyy", CultureInfo.InvariantCulture),
-                    Birthday = DateTime.ParseExact(value[4].ToString(), "mm/dd/yyyy", CultureInfo.InvariantCulture),
+                    DayIn = DateTime.ParseExact(value[3].ToString(), "dd/MM/yyyy", CultureInfo.InvariantCulture),
+                    Birthday = DateTime.ParseExact(value[4].ToString(), "dd/MM/yyyy", CultureInfo.InvariantCulture),
                     PhoneNumber = value[5].ToString().PadLeft(10, '0'),
                     IsBlacklist = !string.IsNullOrEmpty(value[6].ToString()),
                     Department = value[7].ToString(),
+                    Floor = int.Parse(value[8].ToString()),
+                    TelegramId = long.Parse(value[9].ToString()),
                 };
 
                 items.Add(item);
@@ -36,7 +41,7 @@ namespace OrderRice.GoogleSheetModels
 
         public static IList<IList<object>> MapToRangeData(Users item)
         {
-            var objectList = new List<object>() { item.UserName, item.Email, item.FullName, item.DayIn, item.Birthday, item.PhoneNumber, item.IsBlacklist };
+            var objectList = new List<object>() { item.UserName, item.Email, item.FullName, item.GetDayIn(), item.GetBirthday(), item.PhoneNumber, item.GetIsBlacklist(), item.Department, item.Floor, item.TelegramId };
             var rangeData = new List<IList<object>> { objectList };
             return rangeData;
         }

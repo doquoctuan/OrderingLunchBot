@@ -1,27 +1,46 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Google.Apis.Sheets.v4;
+using Google.Apis.Sheets.v4.Data;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using OrderRice.Entities;
 using OrderRice.Exceptions;
+using OrderRice.Helper;
 using OrderRice.Interfaces;
-using System.Runtime.CompilerServices;
+using OrderRice.Persistence;
+using System.Data;
+using System.Text;
 using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
 
 namespace OrderRice.Services
 {
     public class UpdateService
     {
+        private readonly string SPREADSHEET_ID;
+        private readonly string SHEET_NAME;
         private readonly ITelegramBotClient _botClient;
         private readonly ILogger<UpdateService> _logger;
         private readonly IOrderService _orderService;
-        private readonly IUserService _userService;
+        private readonly SpreadsheetsResource.ValuesResource _googleSheetValues;
+        private readonly GoogleSheetContext _googleSheetContext;
 
-        public UpdateService(ITelegramBotClient botClient, ILogger<UpdateService> logger, IOrderService orderService, IUserService userService)
+        public UpdateService(
+            ITelegramBotClient botClient,
+            ILogger<UpdateService> logger,
+            IOrderService orderService,
+            GoogleSheetsHelper googleSheetsHelper,
+            GoogleSheetContext googleSheetContext,
+            IConfiguration configuration)
         {
             _botClient = botClient;
             _logger = logger;
             _orderService = orderService;
-            _userService = userService;
+            _googleSheetValues = googleSheetsHelper.Service.Spreadsheets.Values;
+            _googleSheetContext = googleSheetContext;
+            SPREADSHEET_ID = configuration["GoogleSheetDatasource"];
+            SHEET_NAME = configuration["GoogleSheetName"];
         }
 
         public async Task HandleMessageAsync(Update update)
@@ -61,8 +80,13 @@ namespace OrderRice.Services
 
                 var action = command switch
                 {
-                    "list" or "list@pt_gpmn_bot" => SendList(_botClient, _orderService, message),
-                    "set" or "set@pt_gpmn_bot" => UpdateUserInfo(_botClient, _userService, user, message.Chat.Id),
+                    "list" or "list@khaykhay_bot" => SendList(_botClient, _orderService, message),
+                    "menu" or "menu@khaykhay_bot" => SendMenu(_botClient, _orderService, message),
+                    "order" or "order@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: true, isAll: false),
+                    "unorder" or "unorder@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: false, isAll: false),
+                    "orderall" or "orderall@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: true, isAll: true),
+                    "unorderall" or "unorderall@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: false, isAll: true),
+                    "set" or "set@khaykhay_bot" => SetTelegramId(_botClient, _googleSheetValues, user, message.Chat.Id),
                     _ => Task.CompletedTask
                 };
 
@@ -75,6 +99,7 @@ namespace OrderRice.Services
                     "Cannot find sheetId for the current month" => "Chưa tìm thấy sheet đặt phiếu ăn tháng này",
                     "Cannot find sheetId for the prev month" => "Không tìm thấy sheet đặt phiếu ăn tháng trư",
                     "Today, do not support registration for lunch" => "Hôm nay không hỗ trợ đặt phiếu ăn",
+                    "The user does not exists" => "Không tìm thấy người dùng này",
                     _ => "Hệ thống bận, vui lòng thử lại"
                 };
 
@@ -104,7 +129,7 @@ namespace OrderRice.Services
 
                 await botClient.SendMediaGroupAsync(message.Chat.Id, media: albums);
 
-                if (message.Chat is { Username : "cronjob" })
+                if (message.Chat is { Username: "cronjob" })
                 {
                     if (!string.IsNullOrEmpty(user16))
                     {
@@ -117,11 +142,66 @@ namespace OrderRice.Services
                 }
             }
 
-            static async Task UpdateUserInfo(ITelegramBotClient botClient, IUserService userService, Users user, long chatId)
+            static async Task SendMenu(ITelegramBotClient botClient, IOrderService _orderService, Message message)
             {
-                user.TelegramId = chatId;
-                user.ModifiedDate = DateTime.Now;
-                await userService.UpdateUser(user);
+                var dateNow = DateTime.Now;
+                StringBuilder messageText = new();
+                var menu = await _orderService.GetMenu(dateNow);
+
+                if (menu.Count == 0)
+                {
+                    messageText.Append($"Thứ {(int)dateNow.DayOfWeek + 1} Ngày {dateNow:dd/MM/yyyy} chưa có thực đơn");
+                }
+                else
+                {
+                    messageText.Append($"Thực đơn thứ {(int)dateNow.DayOfWeek + 1} ngày {dateNow:dd/MM/yyyy}:\n");
+                    int i = 1;
+                    foreach (var item in menu.Keys)
+                    {
+                        messageText.Append($"{i++}. {item.Trim()}\n");
+                    }
+                }
+
+                await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: messageText.ToString());
+            }
+
+            static async Task Order(ITelegramBotClient botClient, IOrderService _orderService, Message message, string text, Users user, bool isAll = false, bool isOrder = true)
+            {
+                string userName = string.IsNullOrEmpty(text) ? user.UserName : text;
+
+                StringBuilder messageText = new();
+                string operation = isOrder ? "Đặt" : "Huỷ";
+                messageText.Append(operation);
+
+                var isSucess = await _orderService.Order(
+                        userName: userName,
+                        dateTime: DateTime.Now,
+                        isOrder: isOrder,
+                        isAll: isAll
+                    );
+
+                if (isSucess)
+                {
+                    messageText.Append(" thành công");
+                }
+                else messageText.Append(" thất bại");
+
+                messageText.Append($" cho đồng chí {userName}");
+
+                await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: messageText.ToString());
+            }
+
+            async Task SetTelegramId(ITelegramBotClient botClient, SpreadsheetsResource.ValuesResource _googleSheetValues, Users user, long chatId)
+            {
+                var range = $"{SHEET_NAME}!J{user.RowNum}:J{user.RowNum}";
+                var valueRange = new ValueRange
+                {
+                    Values = new List<IList<object>> { new List<object>() { chatId } }
+                };
+                var updateRequest = _googleSheetValues.Update(valueRange, SPREADSHEET_ID, range);
+                updateRequest.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
+                updateRequest.Execute();
+
                 await botClient.SendTextMessageAsync(chatId, text: $"Cập nhật thông tin thành công cho đồng chí {user.FullName}");
             }
 
@@ -137,11 +217,20 @@ namespace OrderRice.Services
 
         private (bool, Users) IsExists(long telegramId, string messageText)
         {
-            var users = _userService.FindByFilter(x => x.TelegramId == telegramId || x.UserName == messageText);
+            var users = _googleSheetContext
+                            .Users
+                            .Where(x => x.UserName.Equals(messageText) || x.TelegramId.Equals(telegramId)).ToList();
+
             if ((users is null || !users.Any()))
             {
                 return new(false, null);
             }
+
+            if (users.Any(x => x.UserName.Equals(messageText)))
+            {
+                return new(true, users.Find(x => x.UserName.Equals(messageText)));
+            }
+
             return new(true, users[0]);
         }
 

@@ -1,5 +1,4 @@
 ﻿using Google.Apis.Sheets.v4;
-using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,24 +15,20 @@ namespace OrderRice.Extentions
         {
             var serviceProvider = services.BuildServiceProvider();
             IConfiguration configuration = serviceProvider.GetService<IConfiguration>();
-            string cosmosDbEndpoint = configuration["CosmosDBEndpoint"];
-            string accountKey = configuration["CosmosDBAccountKey"];
+            string connectionString = configuration["ConnectionString"];
+
             services.AddDbContext<OrderLunchDbContext>(options =>
             {
-                options.UseCosmos(cosmosDbEndpoint, accountKey, databaseName: "OrderLunchDb");
+                options.UseSqlite(connectionString);
             });
-
-            //using var client = new CosmosClient(cosmosDbEndpoint, accountKey);
-            //var db = client.CreateDatabaseIfNotExistsAsync("OrderLunchDb").GetAwaiter().GetResult();
-            //var container = db.Database.CreateContainerIfNotExistsAsync("Users", "/username").GetAwaiter().GetResult();
 
             services.AddScoped<DbContext>(provider => provider.GetService<OrderLunchDbContext>());
             services.AddTransient<IUserService, UserService>();
 
-            // serviceProvider = services.BuildServiceProvider();
+            serviceProvider = services.BuildServiceProvider();
 
-            // SpreadsheetsResource.ValuesResource googleSheetsHelper = serviceProvider.GetService<GoogleSheetsHelper>().Service.Spreadsheets.Values;
-            // OrderLunchDbContextSeed.SeedDataFromGoogleSheetAsync(serviceProvider.GetService<OrderLunchDbContext>(), googleSheetsHelper);
+            SpreadsheetsResource.ValuesResource googleSheetsHelper = serviceProvider.GetService<GoogleSheetsHelper>().Service.Spreadsheets.Values;
+            OrderLunchDbContextSeed.SeedDataFromGoogleSheetAsync(serviceProvider.GetService<OrderLunchDbContext>(), googleSheetsHelper);
 
             return services;
         }
