@@ -64,6 +64,7 @@ var host = new HostBuilder()
         serviceCollection.AddTransient<AuthTokenHandler>();
         serviceCollection.Decorate<IGoogleAuthService, CachedGoogleAuthService>();
 
+        serviceCollection.AddSingleton<RedisHandler>();
         serviceCollection.AddSingleton<Constants>();
 
     })

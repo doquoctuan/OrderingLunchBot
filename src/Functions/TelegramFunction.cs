@@ -12,7 +12,7 @@ namespace OrderRice.Functions
     {
         private readonly ILogger<TelegramFunction> _logger;
         private readonly UpdateService _updateService;
-        private const long DEVELOPMENT_DEPARMENT_ID = -1001286076862;
+        private const long DEVELOPMENT_DEPARMENT_ID = -100924583407;
 
         public TelegramFunction(ILogger<TelegramFunction> logger, UpdateService updateService)
         {
@@ -20,15 +20,25 @@ namespace OrderRice.Functions
             _updateService = updateService;
         }
 
-        //[Function(nameof(Run))]
-        //public async Task Run([TimerTrigger("38 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
-        //{
-        //    Update update = new()
-        //    {
-        //        Message = new() { Text = "/list", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
-        //    };
-        //    await _updateService.HandleMessageAsync(update);
-        //}
+        [Function(nameof(AutoSendListDaily))]
+        public async Task AutoSendListDaily([TimerTrigger("* 30 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        {
+            Update update = new()
+            {
+                Message = new() { Text = "/list", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
+            };
+            await _updateService.HandleMessageAsync(update);
+        }
+
+        [Function(nameof(AutoSendDebtorDaily))]
+        public async Task AutoSendDebtorDaily([TimerTrigger("* * * * * 0-5")] TimerInfo timerInfo, FunctionContext context)
+        {
+            Update update = new()
+            {
+                Message = new() { Text = "/debtor", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
+            };
+            await _updateService.HandleMessageAsync(update);
+        }
 
         [Function(nameof(TelegramWebhook))]
         public async Task<HttpResponseData> TelegramWebhook([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData request)
