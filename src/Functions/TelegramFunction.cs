@@ -12,7 +12,7 @@ namespace OrderRice.Functions
     {
         private readonly ILogger<TelegramFunction> _logger;
         private readonly UpdateService _updateService;
-        private const long DEVELOPMENT_DEPARMENT_ID = -100924583407;
+        private const long DEVELOPMENT_DEPARMENT_ID = -1286076862;
 
         public TelegramFunction(ILogger<TelegramFunction> logger, UpdateService updateService)
         {
@@ -31,11 +31,21 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoSendDebtorDaily))]
-        public async Task AutoSendDebtorDaily([TimerTrigger("* * * * * 0-5")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendDebtorDaily([TimerTrigger("* 5 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {
                 Message = new() { Text = "/debtor", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
+            };
+            await _updateService.HandleMessageAsync(update);
+        }
+
+        [Function(nameof(AutoSendMenuDaily))]
+        public async Task AutoSendMenuDaily([TimerTrigger("* 0 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        {
+            Update update = new()
+            {
+                Message = new() { Text = "/menu", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
             };
             await _updateService.HandleMessageAsync(update);
         }
