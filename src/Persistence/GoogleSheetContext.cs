@@ -36,8 +36,13 @@ namespace OrderRice.Persistence
                     StartRowIndex = 1,
                     EndRowIndex = 500,
                 },
-                WarningOnly = true,
-                Description = "Quá thời gian đặt/huỷ cơm"
+                WarningOnly = false,
+                Description = "Quá thời gian đặt/huỷ cơm",
+                Editors = new Editors { DomainUsersCanEdit = false, Users = new List<string> {
+                    "phongphattrientest@gmail.com",
+                    "vts-telebot@vts-tele-bot.iam.gserviceaccount.com",
+                    "phongphattriengpmn@gmail.com",
+                } },
             };
 
             // Create the request
