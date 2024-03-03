@@ -152,7 +152,10 @@ namespace OrderRice.Services
 
                 if (!images.Any())
                 {
-                    await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Đã thu hồi xong nợ");
+                    if (!message.Chat.Username.Equals("cronjob"))
+                    {
+                        await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Đã thu hồi xong nợ");
+                    }
                     return;
                 }
 
@@ -178,6 +181,10 @@ namespace OrderRice.Services
 
                 if (menu.Count == 0)
                 {
+                    if (message.Chat.Username.Equals("cronjob"))
+                    {
+                        return;
+                    }
                     messageText.Append($"Thứ {(int)dateNow.DayOfWeek + 1} Ngày {dateNow:dd/MM/yyyy} chưa có thực đơn");
                 }
                 else
