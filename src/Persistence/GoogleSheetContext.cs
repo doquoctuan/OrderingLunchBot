@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Google.Apis.Sheets.v4;
+using Google.Apis.Sheets.v4.Data;
+using Microsoft.Extensions.Configuration;
 using OrderRice.Entities;
 using OrderRice.GoogleSheetModels;
 using OrderRice.Helper;
@@ -7,6 +9,7 @@ namespace OrderRice.Persistence
 {
     public class GoogleSheetContext
     {
+        private readonly GoogleSheetsHelper _googleSheetsHelper;
         public GoogleSheetContext(GoogleSheetsHelper googleSheetsHelper, IConfiguration configuration)
         {
             string SPREADSHEET_ID = configuration["GoogleSheetDatasource"];
@@ -16,8 +19,49 @@ namespace OrderRice.Persistence
             var response = request.Execute();
             var values = response.Values;
             Users = UsersMapper.MapFromRangeData(values);
+            _googleSheetsHelper = googleSheetsHelper;
         }
 
         public List<Users> Users { get; set; }
+
+        public void ProtectedRange(string spreadSheetId, int sheetId, int StartColumnIndex)
+        {
+            var protectedRange = new ProtectedRange
+            {
+                Range = new GridRange
+                {
+                    SheetId = sheetId,
+                    StartColumnIndex = StartColumnIndex,
+                    EndColumnIndex = StartColumnIndex + 1,
+                    StartRowIndex = 1,
+                    EndRowIndex = 500,
+                },
+                WarningOnly = false,
+                Description = "Quá thời gian đặt/huỷ cơm",
+                Editors = new Editors { DomainUsersCanEdit = false, Users = new List<string> {
+                    "phongphattrientest@gmail.com",
+                    "vts-telebot@vts-tele-bot.iam.gserviceaccount.com",
+                    "phongphattriengpmn@gmail.com",
+                } },
+            };
+
+            // Create the request
+            var request = new BatchUpdateSpreadsheetRequest
+            {
+                Requests = new List<Request>
+            {
+                new Request
+                {
+                    AddProtectedRange = new AddProtectedRangeRequest
+                    {
+                        ProtectedRange = protectedRange,
+                    },
+                },
+            },
+            };
+
+            // Execute the request
+            var response = _googleSheetsHelper.Service.Spreadsheets.BatchUpdate(request, spreadSheetId).Execute();
+        }
     }
 }

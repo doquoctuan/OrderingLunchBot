@@ -31,11 +31,7 @@ namespace OrderRice.UnitTests.Services
         [Fact]
         public async Task OrderUnitTest()
         {
-            await _orderService.Order("cuongvt13", DateTime.Now.AddDays(5), isOrder: false, isAll: false);
-            await _orderService.Order("quandm7", DateTime.Now.AddDays(5), isOrder: false, isAll: false);
-            await _orderService.Order("thinnt1", DateTime.Now.AddDays(5), isOrder: false, isAll: false);
-            await _orderService.Order("anpb7", DateTime.Now.AddDays(5), isOrder: false, isAll: false);
-            await _orderService.Order("quihp1", DateTime.Now.AddDays(5), isOrder: false, isAll: false);
+            await _orderService.BlockOrderTicket();
         }
     }
 }
