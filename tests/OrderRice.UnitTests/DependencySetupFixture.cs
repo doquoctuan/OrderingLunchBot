@@ -67,6 +67,7 @@ namespace OrderRice.UnitTests
             serviceCollection.AddTransient<AuthTokenHandler>();
             serviceCollection.Decorate<IGoogleAuthService, CachedGoogleAuthService>();
 
+            serviceCollection.AddSingleton<RedisHandler>();
             serviceCollection.AddSingleton<Constants>();
 
             ServiceProvider = serviceCollection.BuildServiceProvider();

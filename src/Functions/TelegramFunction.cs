@@ -2,6 +2,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using OrderRice.Interfaces;
 using OrderRice.Services;
 using System.Net;
 using Telegram.Bot.Types;
@@ -12,12 +13,20 @@ namespace OrderRice.Functions
     {
         private readonly ILogger<TelegramFunction> _logger;
         private readonly UpdateService _updateService;
+        private readonly IOrderService _orderService;
         private const long DEVELOPMENT_DEPARMENT_ID = -1286076862;
 
-        public TelegramFunction(ILogger<TelegramFunction> logger, UpdateService updateService)
+        public TelegramFunction(ILogger<TelegramFunction> logger, UpdateService updateService, IOrderService orderService)
         {
             _logger = logger;
             _updateService = updateService;
+            _orderService = orderService;
+        }
+
+        [Function(nameof(AutoProtectedSheetDaily))]
+        public async Task AutoProtectedSheetDaily([TimerTrigger("* 50 8 * * *")] TimerInfo timerInfo, FunctionContext context)
+        {
+            await _orderService.BlockOrderTicket();
         }
 
         [Function(nameof(AutoSendListDaily))]

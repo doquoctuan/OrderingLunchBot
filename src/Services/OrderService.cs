@@ -8,6 +8,7 @@ using OrderRice.Persistence;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
+using System;
 using System.Linq;
 using System.Text;
 using Color = SixLabors.ImageSharp.Color;
@@ -437,6 +438,14 @@ namespace OrderRice.Services
             {
                 return new(string.IsNullOrEmpty(datas[1][index]) && !datas[2][index].Equals("0"), datas[0][index], datas[2][index]);
             }
+        }
+
+        public async Task BlockOrderTicket()
+        {
+            var sheetId = await FindSheetId(DateTime.Now);
+            var spreadSheetData = await GetSpreadSheetData(sheetId);
+            var indexColumnStart = GetIndexDateColumn(spreadSheetData, DateTime.Now) + 1;
+            _googleSheetContext.ProtectedRange(spreadSheetId, int.Parse(sheetId), indexColumnStart);
         }
     }
 }
