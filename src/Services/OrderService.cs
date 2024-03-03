@@ -22,6 +22,7 @@ namespace OrderRice.Services
         private readonly ILogger<OrderService> _logger;
         private readonly string spreadSheetId;
         private readonly string BASE_IMAGE_URL;
+        private readonly string BASE_IMAGE_UNPAID_URL;
         private const int SIZE_LIST = 23;
         private const int FONT_SIZE = 40;
 
@@ -37,6 +38,7 @@ namespace OrderRice.Services
             _logger = logger;
             spreadSheetId = configuration["SpreadSheetId"];
             BASE_IMAGE_URL = configuration["BASE_IMAGE"];
+            BASE_IMAGE_UNPAID_URL = configuration["BASE_IMAGE_UNPAID"];
             _googleSheetContext = googleSheetContext;
         }
 
@@ -164,7 +166,7 @@ namespace OrderRice.Services
                 }
             }
 
-            Dictionary<int, string> deptMap = new();
+            Dictionary<int, (string, int)> deptMap = new();
             List<string> floor16 = new();
             List<string> floor19 = new();
             try
@@ -355,7 +357,59 @@ namespace OrderRice.Services
             return await WriteSpreadSheet(dateTime, indexColumnStart, indexColumnEnd, userRow, sheetId, isOrder ? "x" : string.Empty);
         }
 
-        public async Task<Dictionary<int, string>> UnPaidList()
+        public async Task<List<(string, string)>> CreateUnpaidImage()
+        {
+            try
+            {
+                using HttpClient httpClient = new();
+                byte[] baseImageBytes = await httpClient.GetByteArrayAsync(BASE_IMAGE_UNPAID_URL);
+                using Image<Rgba32> baseImage = Image.Load<Rgba32>(baseImageBytes);
+
+                // Draw date time
+                baseImage.Mutate(ctx => ctx.DrawText(
+                                            text: $"{DateTime.Now:dd/MM/yyyy}",
+                                            font: new Font(SystemFonts.Get("Arial"), FONT_SIZE, FontStyle.Bold),
+                                            color: new Color(Rgba32.ParseHex("#000000")),
+                                            location: new PointF(895, 317)));
+
+                var unpaidMap = await UnPaidList();
+
+                List<(string, string)> listRegister = new();
+                var registerLunchTodaysChunks = unpaidMap.Chunk(SIZE_LIST);
+                int countImage = 1;
+                var font = new Font(SystemFonts.Get("Arial"), FONT_SIZE, FontStyle.Regular);
+                var color = new Color(Rgba32.ParseHex("#000000"));
+                int index = 1;
+                foreach (var list in registerLunchTodaysChunks)
+                {
+                    int step = 0;
+                    int start = 535;
+                    var image = baseImage.Clone();
+
+                    foreach (var l in list)
+                    {
+                        image.Mutate(ctx => ctx.DrawText($"{l.Value.Item2 * 30}K", font, color, location: new PointF(1100, start + step)));
+                        image.Mutate(ctx => ctx.DrawText($"{index}", font, color, location: new PointF(index < 10 ? 252 : 240, start + step)));
+                        image.Mutate(ctx => ctx.DrawText(l.Value.Item1, font, color, location: new PointF(390, start + step)));
+                        step += 59;
+                        index++;
+                    }
+
+                    listRegister.Add(new(image.ToBase64String(PngFormat.Instance)
+                                            .Split(';')[1]
+                                            .Replace("base64,", ""), $"Ảnh {countImage++}"));
+                }
+
+                return listRegister;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Dictionary<int, (string, int)>> UnPaidList()
         {
             var prevSheetId = await FindSheetId(DateTime.Now.AddMonths(-1));
             if (string.IsNullOrEmpty(prevSheetId))
@@ -365,23 +419,23 @@ namespace OrderRice.Services
 
             var prevSpreadSheetData = await GetSpreadSheetData(prevSheetId);
 
-            Dictionary<int, string> debtMap = new();
+            Dictionary<int, (string, int)> debtMap = new();
 
             // Get index of the debt list
-            for (int i = 0; i < prevSpreadSheetData[1].Count; i++)
+            for (int i = 0; i < prevSpreadSheetData[0].Count; i++)
             {
-                (bool isUnpaid, string name) = IsUnPaid(prevSpreadSheetData, i);
+                (bool isUnpaid, string name, string totalTicket) = IsUnPaid(prevSpreadSheetData, i);
                 if (isUnpaid)
                 {
-                    debtMap.Add(i, name);
+                    debtMap.Add(i, new(name, int.Parse(totalTicket)));
                 }
             }
 
             return debtMap;
 
-            static (bool, string) IsUnPaid(List<List<string>> datas, int index)
+            static (bool, string, string) IsUnPaid(List<List<string>> datas, int index)
             {
-                return new(!datas[1][index].Equals("v", StringComparison.OrdinalIgnoreCase) && !datas[2][index].Equals("0"), datas[0][index]);
+                return new(string.IsNullOrEmpty(datas[1][index]) && !datas[2][index].Equals("0"), datas[0][index], datas[2][index]);
             }
         }
     }

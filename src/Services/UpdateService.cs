@@ -8,6 +8,7 @@ using OrderRice.Helper;
 using OrderRice.Interfaces;
 using OrderRice.Persistence;
 using System.Data;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Telegram.Bot;
@@ -25,6 +26,7 @@ namespace OrderRice.Services
         private readonly IOrderService _orderService;
         private readonly SpreadsheetsResource.ValuesResource _googleSheetValues;
         private readonly GoogleSheetContext _googleSheetContext;
+        private readonly string urlPaymentInfo;
 
         public UpdateService(
             ITelegramBotClient botClient,
@@ -41,6 +43,7 @@ namespace OrderRice.Services
             _googleSheetContext = googleSheetContext;
             SPREADSHEET_ID = configuration["GoogleSheetDatasource"];
             SHEET_NAME = configuration["GoogleSheetName"];
+            urlPaymentInfo = configuration["BASE_IMAGE_PAYMENTINFO"];
         }
 
         public async Task HandleMessageAsync(Update update)
@@ -81,6 +84,7 @@ namespace OrderRice.Services
                 var action = command switch
                 {
                     "list" or "list@khaykhay_bot" => SendList(_botClient, _orderService, message),
+                    "debtor" or "debtor@khaykhay_bot" => SendDebtor(_botClient, _orderService, message),
                     "menu" or "menu@khaykhay_bot" => SendMenu(_botClient, _orderService, message),
                     "order" or "order@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: true, isAll: false),
                     "unorder" or "unorder@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: false, isAll: false),
@@ -142,6 +146,30 @@ namespace OrderRice.Services
                 }
             }
 
+            async Task SendDebtor(ITelegramBotClient botClient, IOrderService _orderService, Message message)
+            {
+                var images = await _orderService.CreateUnpaidImage();
+
+                if (!images.Any())
+                {
+                    await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Đã thu hồi xong nợ");
+                    return;
+                }
+
+                var albums = images.Select(x =>
+                {
+                    (string base64Img, string nameImage) = x;
+                    var bytes = Convert.FromBase64String(base64Img);
+                    return new InputMediaPhoto(InputFile.FromStream(new MemoryStream(bytes), fileName: $"{nameImage}.png"))
+                    {
+                        Caption = nameImage,
+                    };
+                });
+
+                await botClient.SendMediaGroupAsync(message.Chat.Id, media: albums);
+                await botClient.SendPhotoAsync(message.Chat.Id,photo: InputFile.FromUri(urlPaymentInfo));
+            }
+
             static async Task SendMenu(ITelegramBotClient botClient, IOrderService _orderService, Message message)
             {
                 var dateNow = DateTime.Now;
@@ -170,7 +198,7 @@ namespace OrderRice.Services
                 string userName = string.IsNullOrEmpty(text) ? user.UserName : text;
 
                 StringBuilder messageText = new();
-                string operation = isOrder ? "Đặt" : "Huỷ";
+                string operation = isOrder ? "Đặt cơm" : "Huỷ cơm";
                 messageText.Append(operation);
 
                 var isSucess = await _orderService.Order(
