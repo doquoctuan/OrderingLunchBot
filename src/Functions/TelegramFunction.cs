@@ -24,13 +24,13 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoProtectedSheetDaily))]
-        public async Task AutoProtectedSheetDaily([TimerTrigger("* 50 8 * * *")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoProtectedSheetDaily([TimerTrigger("0 50 8 * * *")] TimerInfo timerInfo, FunctionContext context)
         {
             await _orderService.BlockOrderTicket();
         }
 
         [Function(nameof(AutoSendListDaily))]
-        public async Task AutoSendListDaily([TimerTrigger("* 30 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendListDaily([TimerTrigger("0 30 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {
@@ -40,7 +40,7 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoSendDebtorDaily))]
-        public async Task AutoSendDebtorDaily([TimerTrigger("* 15 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendDebtorDaily([TimerTrigger("0 10 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {
@@ -50,7 +50,7 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoSendMenuDaily))]
-        public async Task AutoSendMenuDaily([TimerTrigger("* 0 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendMenuDaily([TimerTrigger("0 0 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {
