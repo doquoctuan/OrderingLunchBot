@@ -14,7 +14,7 @@ namespace OrderRice.Functions
         private readonly ILogger<TelegramFunction> _logger;
         private readonly UpdateService _updateService;
         private readonly IOrderService _orderService;
-        private const long DEVELOPMENT_DEPARMENT_ID = -1286076862;
+        private const long DEVELOPMENT_DEPARMENT_ID = -1001286076862;
 
         public TelegramFunction(ILogger<TelegramFunction> logger, UpdateService updateService, IOrderService orderService)
         {
@@ -40,7 +40,7 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoSendDebtorDaily))]
-        public async Task AutoSendDebtorDaily([TimerTrigger("* 5 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendDebtorDaily([TimerTrigger("* 15 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {
