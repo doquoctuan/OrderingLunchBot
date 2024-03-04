@@ -167,12 +167,14 @@ namespace OrderRice.Services
                 }
             }
 
-            Dictionary<int, (string, int)> deptMap = new();
+            HashSet<string> deptSet = new();
             List<string> floor16 = new();
             List<string> floor19 = new();
+
             try
             {
-                deptMap = await UnPaidList();
+                var deptMap = await UnPaidList();
+                deptSet = deptMap.Select(x => x.Value.Item1).ToHashSet();
             }
             catch (Exception ex)
             {
@@ -189,7 +191,7 @@ namespace OrderRice.Services
                 {
                     var name = datas[0][i];
                     AddList(floor16, floor19, name);
-                    if (deptMap.ContainsKey(i))
+                    if (deptSet.Contains(name))
                     {
                         statusPaid = "Nợ";
                         AddList(floor16, floor19, name);
