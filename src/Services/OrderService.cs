@@ -152,7 +152,7 @@ namespace OrderRice.Services
 
             void AddList(List<string> floor16, List<string> floor19, string name)
             {
-                if (IsContain(blackListUsers, name))
+                if (IsContain(blackListUsers, name) || name.Contains("OS") || name.Contains("TTS"))
                 {
                     return;
                 }
