@@ -134,7 +134,7 @@ namespace OrderRice.Services
             return currentDateItem;
         }
 
-        private async Task<(List<(string, string)>, string, string)> ProcessCreateImage(List<List<string>> datas, int indexCurrentDate, Image<Rgba32> baseImage)
+        private async Task<(List<(string, string)>, string, string)> ProcessCreateImage(List<List<string>> datas, int indexCurrentDate, Image<Rgba32> baseImage, string folderName = "list")
         {
             var blackListUsers = _googleSheetContext.Users.Where(x => x.IsBlacklist == true).Select(x => x.FullName).ToList();
 
@@ -224,7 +224,7 @@ namespace OrderRice.Services
                 var response = await _githubService
                                         .UploadImageAsync(image.ToBase64String(PngFormat.Instance)
                                         .Split(';')[1]
-                                        .Replace("base64,", ""), "list");
+                                        .Replace("base64,", ""), folderName);
                 listRegister.Add(new(response.Content.DownloadUrl, $"Ảnh {countImage++}"));
             }
 
@@ -236,7 +236,7 @@ namespace OrderRice.Services
             return new(listRegister, floor16.Count > 0 ? floor16[randomIndexFloor16] : string.Empty, floor19.Count > 0 ? floor19[randomIndexFloor19] : string.Empty);
         }
 
-        public async Task<(List<(string, string)>, string, string)> CreateOrderListImage()
+        public async Task<(List<(string, string)>, string, string)> CreateOrderListImage(string folderName)
         {
             var sheetId = await FindSheetId(DateTime.Now);
             if (string.IsNullOrEmpty(sheetId))
@@ -264,7 +264,7 @@ namespace OrderRice.Services
                                             color: new Color(Rgba32.ParseHex("#000000")),
                                             location: new PointF(895, 317)));
 
-                return await ProcessCreateImage(spreadSheetData, indexCurrentDate, baseImage);
+                return await ProcessCreateImage(spreadSheetData, indexCurrentDate, baseImage, folderName: folderName);
 
             }
             catch (Exception)
