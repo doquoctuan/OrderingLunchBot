@@ -22,7 +22,7 @@ namespace OrderRice.UnitTests.Services
         public async Task CreateOrderListImage_ShouldReturnUrl()
         {
             // Action
-            var result = await _orderService.CreateOrderListImage();
+            var result = await _orderService.CreateOrderListImage("list");
         }
 
         //[Fact]
