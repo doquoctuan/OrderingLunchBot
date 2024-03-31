@@ -487,3 +487,7 @@ ServiceDependencies
 serviceDependencies*
 
 *local.settings.json
+
+# NPM
+
+package-lock.json
