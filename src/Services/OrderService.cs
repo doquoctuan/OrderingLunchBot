@@ -134,7 +134,7 @@ namespace OrderRice.Services
             return currentDateItem;
         }
 
-        private async Task<(List<(string, string)>, string, string)> ProcessCreateImage(List<List<string>> datas, int indexCurrentDate, Image<Rgba32> baseImage)
+        private async Task<(List<(string, string)>, string, string)> ProcessCreateImage(List<List<string>> datas, int indexCurrentDate, Image<Rgba32> baseImage, string folderName = "list")
         {
             var blackListUsers = _googleSheetContext.Users.Where(x => x.IsBlacklist == true).Select(x => x.FullName).ToList();
 
@@ -152,7 +152,7 @@ namespace OrderRice.Services
 
             void AddList(List<string> floor16, List<string> floor19, string name)
             {
-                if (IsContain(blackListUsers, name))
+                if (IsContain(blackListUsers, name) || name.Contains("OS") || name.Contains("TTS"))
                 {
                     return;
                 }
@@ -167,12 +167,14 @@ namespace OrderRice.Services
                 }
             }
 
-            Dictionary<int, (string, int)> deptMap = new();
+            HashSet<string> deptSet = new();
             List<string> floor16 = new();
             List<string> floor19 = new();
+
             try
             {
-                deptMap = await UnPaidList();
+                var deptMap = await UnPaidList();
+                deptSet = deptMap.Select(x => x.Value.Item1).ToHashSet();
             }
             catch (Exception ex)
             {
@@ -189,7 +191,7 @@ namespace OrderRice.Services
                 {
                     var name = datas[0][i];
                     AddList(floor16, floor19, name);
-                    if (deptMap.ContainsKey(i))
+                    if (deptSet.Contains(name))
                     {
                         statusPaid = "Nợ";
                         AddList(floor16, floor19, name);
@@ -222,7 +224,7 @@ namespace OrderRice.Services
                 var response = await _githubService
                                         .UploadImageAsync(image.ToBase64String(PngFormat.Instance)
                                         .Split(';')[1]
-                                        .Replace("base64,", ""), "list");
+                                        .Replace("base64,", ""), folderName);
                 listRegister.Add(new(response.Content.DownloadUrl, $"Ảnh {countImage++}"));
             }
 
@@ -234,7 +236,7 @@ namespace OrderRice.Services
             return new(listRegister, floor16.Count > 0 ? floor16[randomIndexFloor16] : string.Empty, floor19.Count > 0 ? floor19[randomIndexFloor19] : string.Empty);
         }
 
-        public async Task<(List<(string, string)>, string, string)> CreateOrderListImage()
+        public async Task<(List<(string, string)>, string, string)> CreateOrderListImage(string folderName)
         {
             var sheetId = await FindSheetId(DateTime.Now);
             if (string.IsNullOrEmpty(sheetId))
@@ -262,7 +264,7 @@ namespace OrderRice.Services
                                             color: new Color(Rgba32.ParseHex("#000000")),
                                             location: new PointF(895, 317)));
 
-                return await ProcessCreateImage(spreadSheetData, indexCurrentDate, baseImage);
+                return await ProcessCreateImage(spreadSheetData, indexCurrentDate, baseImage, folderName: folderName);
 
             }
             catch (Exception)

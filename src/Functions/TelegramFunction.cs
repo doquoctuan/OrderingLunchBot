@@ -14,7 +14,7 @@ namespace OrderRice.Functions
         private readonly ILogger<TelegramFunction> _logger;
         private readonly UpdateService _updateService;
         private readonly IOrderService _orderService;
-        private const long DEVELOPMENT_DEPARMENT_ID = -1286076862;
+        private const long DEVELOPMENT_DEPARMENT_ID = -1001286076862;
 
         public TelegramFunction(ILogger<TelegramFunction> logger, UpdateService updateService, IOrderService orderService)
         {
@@ -24,13 +24,13 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoProtectedSheetDaily))]
-        public async Task AutoProtectedSheetDaily([TimerTrigger("* 50 8 * * *")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoProtectedSheetDaily([TimerTrigger("0 50 8 * * *")] TimerInfo timerInfo, FunctionContext context)
         {
             await _orderService.BlockOrderTicket();
         }
 
         [Function(nameof(AutoSendListDaily))]
-        public async Task AutoSendListDaily([TimerTrigger("* 30 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendListDaily([TimerTrigger("0 30 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {
@@ -40,7 +40,7 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoSendDebtorDaily))]
-        public async Task AutoSendDebtorDaily([TimerTrigger("* 5 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendDebtorDaily([TimerTrigger("0 10 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {
@@ -50,7 +50,7 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoSendMenuDaily))]
-        public async Task AutoSendMenuDaily([TimerTrigger("* 0 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendMenuDaily([TimerTrigger("0 0 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {

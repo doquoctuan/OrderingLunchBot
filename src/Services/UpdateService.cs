@@ -114,7 +114,7 @@ namespace OrderRice.Services
 
             static async Task SendList(ITelegramBotClient botClient, IOrderService _orderService, Message message)
             {
-                (var response, string user16, string user19) = await _orderService.CreateOrderListImage();
+                (var response, string user16, string user19) = await _orderService.CreateOrderListImage(message?.From?.Username ?? "list");
 
                 if (!response.Any())
                 {
