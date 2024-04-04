@@ -8,5 +8,6 @@
         Task<Dictionary<int, (string, int)>> UnPaidList();
         Task<List<(string, string)>> CreateUnpaidImage();
         Task BlockOrderTicket();
+        Task<bool> PaymentConfirmation(string userName);
     }
 }

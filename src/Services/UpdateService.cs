@@ -8,7 +8,6 @@ using OrderRice.Helper;
 using OrderRice.Interfaces;
 using OrderRice.Persistence;
 using System.Data;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Telegram.Bot;
@@ -91,6 +90,7 @@ namespace OrderRice.Services
                     "orderall" or "orderall@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: true, isAll: true),
                     "unorderall" or "unorderall@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: false, isAll: true),
                     "set" or "set@khaykhay_bot" => SetTelegramId(_botClient, _googleSheetValues, user, message.Chat.Id),
+                    "confirm" or "confirm@khaykhay_bot" => PaymentConfirmation(_botClient, user, message.Chat.Id),
                     _ => Task.CompletedTask
                 };
 
@@ -170,7 +170,7 @@ namespace OrderRice.Services
                 });
 
                 await botClient.SendMediaGroupAsync(message.Chat.Id, media: albums);
-                await botClient.SendPhotoAsync(message.Chat.Id,photo: InputFile.FromUri(urlPaymentInfo));
+                await botClient.SendPhotoAsync(message.Chat.Id, photo: InputFile.FromUri(urlPaymentInfo));
             }
 
             static async Task SendMenu(ITelegramBotClient botClient, IOrderService _orderService, Message message)
@@ -238,6 +238,13 @@ namespace OrderRice.Services
                 updateRequest.Execute();
 
                 await botClient.SendTextMessageAsync(chatId, text: $"Cập nhật thông tin thành công cho đồng chí {user.FullName}");
+            }
+
+            async Task PaymentConfirmation(ITelegramBotClient botClient, Users user, long chatId)
+            {
+                bool isSuccess = await _orderService.PaymentConfirmation(user?.FullName);
+                string messageText = isSuccess ? $"Đã xác nhận thanh toán tiền cơm tháng {DateTime.Now.AddMonths(-1).Month} cho đồng chí {user?.FullName}" : "Chưa thể xác nhận thanh toán vào lúc này, vui lòng thử lại.";
+                await botClient.SendTextMessageAsync(chatId, text: messageText);
             }
 
             #endregion
