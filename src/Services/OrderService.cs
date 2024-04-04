@@ -8,8 +8,6 @@ using OrderRice.Persistence;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
-using System;
-using System.Linq;
 using System.Text;
 using Color = SixLabors.ImageSharp.Color;
 
@@ -448,6 +446,29 @@ namespace OrderRice.Services
             var spreadSheetData = await GetSpreadSheetData(sheetId);
             var indexColumnStart = GetIndexDateColumn(spreadSheetData, DateTime.Now) + 1;
             _googleSheetContext.ProtectedRange(spreadSheetId, int.Parse(sheetId), indexColumnStart);
+        }
+
+        public async Task<bool> PaymentConfirmation(string fullName)
+        {
+            var prevSheetId = await FindSheetId(DateTime.Now.AddMonths(-1));
+            if (string.IsNullOrEmpty(prevSheetId))
+            {
+                throw new OrderServiceException(ErrorMessages.CANNOT_FIND_PREV_SHEET);
+            }
+            var spreadSheetData = await GetSpreadSheetData(prevSheetId);
+            if (string.IsNullOrEmpty(fullName))
+            {
+                throw new Exception("This user could not be found");
+            }
+            for (int i = 0; i < spreadSheetData[0].Count; i++)
+            {
+                if (spreadSheetData[0][i].Contains(fullName))
+                {
+                    int CHECKPAYMENT_COLUMN = 2;
+                    return await WriteSpreadSheet(DateTime.Now, CHECKPAYMENT_COLUMN, CHECKPAYMENT_COLUMN + 1, i, prevSheetId);
+                }
+            }
+            return false;
         }
     }
 }
