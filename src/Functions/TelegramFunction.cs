@@ -30,7 +30,7 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoSendListDaily))]
-        public async Task AutoSendListDaily([TimerTrigger("0 30 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendListDaily([TimerTrigger("0 30 9 * * *")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {
@@ -40,7 +40,7 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoSendDebtorDaily))]
-        public async Task AutoSendDebtorDaily([TimerTrigger("0 10 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendDebtorDaily([TimerTrigger("0 10 8 * * *")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {

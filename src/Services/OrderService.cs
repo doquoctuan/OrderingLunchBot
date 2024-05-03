@@ -75,7 +75,7 @@ namespace OrderRice.Services
             return JsonConvert.DeserializeObject<List<List<string>>>(Convert.ToString(listResult));
         }
 
-        private async Task<bool> WriteSpreadSheet(DateTime startDate, int startColumnIndex, int endColumnIndex, int rowIndex, string sheetId, string text = "x")
+        private async Task<bool> WriteSpreadSheet(DateTime startDate, int startColumnIndex, int endColumnIndex, int rowIndex, string sheetId, string text = "x", bool isAllowWeeken = false)
         {
             string[][] values = new string[1][];
             int totalItem = (endColumnIndex - startColumnIndex);
@@ -86,7 +86,7 @@ namespace OrderRice.Services
                     values[i] = new string[totalItem];
                 }
                 var isWeeken = startDate.DayOfWeek == DayOfWeek.Sunday || startDate.DayOfWeek == DayOfWeek.Saturday;
-                values[0][i] = !isWeeken ? text : string.Empty;
+                values[0][i] = !isWeeken || isAllowWeeken ? text : string.Empty;
                 startDate = startDate.AddDays(1);
             }
 
@@ -222,7 +222,7 @@ namespace OrderRice.Services
                 var response = await _githubService
                                         .UploadImageAsync(image.ToBase64String(PngFormat.Instance)
                                         .Split(';')[1]
-                                        .Replace("base64,", ""), folderName);
+                                        .Replace("base64,", ""), folderName, prefixName: folderName);
                 listRegister.Add(new(response.Content.DownloadUrl, $"Ảnh {countImage++}"));
             }
 
@@ -285,7 +285,7 @@ namespace OrderRice.Services
             Dictionary<string, string> menu = new();
             foreach (var item in spreadSheetData)
             {
-                if (item.Any() && (bool)(item?[0].Contains("Thực đơn")))
+                if (item.Any() && (bool)(item?[0].Contains("Thực đơn", StringComparison.OrdinalIgnoreCase)))
                 {
                     for (int i = 1; i < item.Count; i++)
                     {
@@ -293,16 +293,10 @@ namespace OrderRice.Services
                             && (item[i].Contains(dateTimeToString)
                             || item[i].Contains(dateTimeToStringWithAnother)))
                         {
-                            if (dateTime.DayOfWeek != DayOfWeek.Friday)
+                            int j = i + 1;
+                            while (j < item.Count && !string.IsNullOrEmpty(item[j]))
                             {
-                                menu.Add(item[i + 1].Split(".")[1].Trim(), string.Empty);
-                                menu.Add(item[i + 2].Split(".")[1].Trim(), string.Empty);
-                                menu.Add(item[i + 3].Split(".")[1].Trim(), string.Empty);
-                                menu.Add(item[i + 4].Split(".")[1].Trim(), string.Empty);
-                            }
-                            else
-                            {
-                                menu.Add(item[i + 1], string.Empty);
+                                menu.Add(item[j++], string.Empty);
                             }
                             break;
                         }
@@ -355,7 +349,7 @@ namespace OrderRice.Services
                 throw new OrderServiceException(ErrorMessages.USER_DOES_NOT_EXIST);
             }
 
-            return await WriteSpreadSheet(dateTime, indexColumnStart, indexColumnEnd, userRow, sheetId, isOrder ? "x" : string.Empty);
+            return await WriteSpreadSheet(dateTime, indexColumnStart, indexColumnEnd, userRow, sheetId, isOrder ? "x" : string.Empty, isAllowWeeken: !isAll);
         }
 
         public async Task<List<(string, string)>> CreateUnpaidImage()
@@ -462,10 +456,10 @@ namespace OrderRice.Services
             }
             for (int i = 0; i < spreadSheetData[0].Count; i++)
             {
-                if (spreadSheetData[0][i].Contains(fullName))
+                if (spreadSheetData[0][i].Contains(fullName, StringComparison.OrdinalIgnoreCase))
                 {
                     int CHECKPAYMENT_COLUMN = 2;
-                    return await WriteSpreadSheet(DateTime.Now, CHECKPAYMENT_COLUMN, CHECKPAYMENT_COLUMN + 1, i, prevSheetId);
+                    return await WriteSpreadSheet(DateTime.Now, CHECKPAYMENT_COLUMN, CHECKPAYMENT_COLUMN + 1, i, prevSheetId, isAllowWeeken: true);
                 }
             }
             return false;

@@ -118,7 +118,10 @@ namespace OrderRice.Services
 
                 if (!response.Any())
                 {
-                    await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Không có đồng chí nào đặt phiếu ăn hôm nay");
+                    if (message.Chat is not { Username: "cronjob" })
+                    {
+                        await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Không có đồng chí nào đặt phiếu ăn hôm nay");
+                    }
                     return;
                 }
 
@@ -179,7 +182,7 @@ namespace OrderRice.Services
                 StringBuilder messageText = new();
                 var menu = await _orderService.GetMenu(dateNow);
 
-                if (menu.Count == 0)
+                if (!menu.Any())
                 {
                     if (message.Chat.Username.Equals("cronjob"))
                     {
@@ -190,10 +193,9 @@ namespace OrderRice.Services
                 else
                 {
                     messageText.Append($"Thực đơn thứ {(int)dateNow.DayOfWeek + 1} ngày {dateNow:dd/MM/yyyy}:\n");
-                    int i = 1;
                     foreach (var item in menu.Keys)
                     {
-                        messageText.Append($"{i++}. {item.Trim()}\n");
+                        messageText.Append($"{item.Trim()}\n");
                     }
                 }
 
@@ -219,7 +221,7 @@ namespace OrderRice.Services
                 {
                     messageText.Append(" thành công");
                 }
-                else messageText.Append(" thất bại");
+                else messageText.Append(" thất bại, sheet cơm đã bị khóa");
 
                 messageText.Append($" cho đồng chí {userName}");
 
