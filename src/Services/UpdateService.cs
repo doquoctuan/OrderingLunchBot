@@ -118,10 +118,7 @@ namespace OrderRice.Services
 
                 if (!response.Any())
                 {
-                    if (message.Chat is not { Username: "cronjob" })
-                    {
-                        await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Không có đồng chí nào đặt phiếu ăn hôm nay");
-                    }
+                    await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Không có đồng chí nào đặt phiếu ăn hôm nay");
                     return;
                 }
 
@@ -140,11 +137,7 @@ namespace OrderRice.Services
                 {
                     if (!string.IsNullOrEmpty(user16))
                     {
-                        await botClient.SendTextMessageAsync(message.Chat.Id, $"Đồng chí {user16} lấy phiếu cơm tầng 16");
-                    }
-                    if (!string.IsNullOrEmpty(user19))
-                    {
-                        await botClient.SendTextMessageAsync(message.Chat.Id, $"Đồng chí {user19} lấy phiếu cơm tầng 19");
+                        await botClient.SendTextMessageAsync(message.Chat.Id, $"Đồng chí {user16} lấy phiếu cơm cho phòng Phát triển");
                     }
                 }
             }
