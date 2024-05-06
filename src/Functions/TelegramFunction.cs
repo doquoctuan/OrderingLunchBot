@@ -14,7 +14,7 @@ namespace OrderRice.Functions
         private readonly ILogger<TelegramFunction> _logger;
         private readonly UpdateService _updateService;
         private readonly IOrderService _orderService;
-        private const long DEVELOPMENT_DEPARMENT_ID = -1001286076862;
+        private const long DEVELOPMENT_DEPARMENT_ID = -1002094428444;
 
         public TelegramFunction(ILogger<TelegramFunction> logger, UpdateService updateService, IOrderService orderService)
         {
@@ -24,7 +24,7 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoProtectedSheetDaily))]
-        public async Task AutoProtectedSheetDaily([TimerTrigger("0 50 8 * * *")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoProtectedSheetDaily([TimerTrigger("0 59 8 * * *")] TimerInfo timerInfo, FunctionContext context)
         {
             await _orderService.BlockOrderTicket();
         }
