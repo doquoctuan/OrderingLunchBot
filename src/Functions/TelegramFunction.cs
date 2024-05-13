@@ -30,7 +30,7 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoSendListDaily))]
-        public async Task AutoSendListDaily([TimerTrigger("0 30 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendListDaily([TimerTrigger("0 30 9 * * *")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {
@@ -52,15 +52,11 @@ namespace OrderRice.Functions
         [Function(nameof(AutoSendMenuDaily))]
         public async Task AutoSendMenuDaily([TimerTrigger("0 0 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
-            await _updateService.HandleMessageAsync(new()
-            {
-                Message = new() { Text = "/list", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "tuandq16" } }
-            });
-
-            await _updateService.HandleMessageAsync(new()
+            Update update = new()
             {
                 Message = new() { Text = "/menu", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
-            });
+            };
+            await _updateService.HandleMessageAsync(update);
         }
 
         [Function(nameof(TelegramWebhook))]
