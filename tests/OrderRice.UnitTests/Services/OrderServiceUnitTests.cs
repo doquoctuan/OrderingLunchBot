@@ -28,7 +28,7 @@ namespace OrderRice.UnitTests.Services
         [Fact]
         public async Task OrderUnitTest()
         {
-            var result = await _orderService.PaymentConfirmation("Đỗ Quốc Tuấn");
+            var result = await _orderService.OrderTicket();
         }
     }
 }

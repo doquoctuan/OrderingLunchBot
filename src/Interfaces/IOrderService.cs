@@ -9,5 +9,6 @@
         Task<List<(string, string)>> CreateUnpaidImage();
         Task BlockOrderTicket();
         Task<bool> PaymentConfirmation(string userName);
+        Task<bool> OrderTicket();
     }
 }
