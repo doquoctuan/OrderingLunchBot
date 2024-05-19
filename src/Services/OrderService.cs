@@ -6,8 +6,11 @@ using OrderRice.Exceptions;
 using OrderRice.Interfaces;
 using OrderRice.Persistence;
 using SixLabors.Fonts;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using System.Text;
 using Color = SixLabors.ImageSharp.Color;
 
@@ -20,6 +23,7 @@ namespace OrderRice.Services
         private readonly GoogleSheetContext _googleSheetContext;
         private readonly ILogger<OrderService> _logger;
         private readonly string spreadSheetId;
+        private readonly string centralSpreadSheetId;
         private readonly string BASE_IMAGE_URL;
         private readonly string BASE_IMAGE_UNPAID_URL;
         private const int SIZE_LIST = 23;
@@ -36,14 +40,21 @@ namespace OrderRice.Services
             _githubService = githubService;
             _logger = logger;
             spreadSheetId = configuration["SpreadSheetId"];
+            centralSpreadSheetId = configuration["CentralSpreadSheetId"];
             BASE_IMAGE_URL = configuration["BASE_IMAGE"];
             BASE_IMAGE_UNPAID_URL = configuration["BASE_IMAGE_UNPAID"];
             _googleSheetContext = googleSheetContext;
         }
 
-        private async Task<string> FindSheetId(DateTime dateTime)
+        private async Task<string> FindSheetId(DateTime dateTime, string spearchSheet = null)
         {
-            var response = await _httpGoogleClient.GetAsync($"/v4/spreadsheets/{spreadSheetId}");
+            string searchPattern = $"Tháng {dateTime:M/yyyy}";
+            if (spearchSheet is null)
+            {
+                spearchSheet = spreadSheetId;
+                searchPattern = $"T{dateTime:M/yyyy}";
+            }
+            var response = await _httpGoogleClient.GetAsync($"/v4/spreadsheets/{spearchSheet}");
             response.EnsureSuccessStatusCode();
             var body = await response.Content.ReadAsStringAsync();
             var jObject = JsonConvert.DeserializeObject<JObject>(body);
@@ -51,7 +62,7 @@ namespace OrderRice.Services
             foreach (var sheet in jArraySheets)
             {
                 var title = sheet.SelectToken("properties.title").ToString();
-                if (title.Equals($"T{dateTime:M/yyyy}"))
+                if (title.Equals(searchPattern))
                 {
                     return sheet.SelectToken("properties.sheetId").ToString();
                 }
@@ -59,8 +70,9 @@ namespace OrderRice.Services
             return string.Empty;
         }
 
-        private async Task<List<List<string>>> GetSpreadSheetData(string sheetId)
+        private async Task<List<List<string>>> GetSpreadSheetData(string sheetId, string spearchSheet = null)
         {
+            spearchSheet ??= spreadSheetId;
             var payload = new
             {
                 dataFilters = new[] { new { gridRange = new { sheetId, startColumnIndex = 1 } } },
@@ -68,15 +80,16 @@ namespace OrderRice.Services
             };
             var json = JsonConvert.SerializeObject(payload);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpGoogleClient.PostAsync($"/v4/spreadsheets/{spreadSheetId}/values:batchGetByDataFilter", httpContent);
+            var response = await _httpGoogleClient.PostAsync($"/v4/spreadsheets/{spearchSheet}/values:batchGetByDataFilter", httpContent);
             var body = await response.Content.ReadAsStringAsync();
             dynamic jsonConvert = JsonConvert.DeserializeObject(body);
             var listResult = jsonConvert.valueRanges[0].valueRange.values;
             return JsonConvert.DeserializeObject<List<List<string>>>(Convert.ToString(listResult));
         }
 
-        private async Task<bool> WriteSpreadSheet(DateTime startDate, int startColumnIndex, int endColumnIndex, int rowIndex, string sheetId, string text = "x", bool isAllowWeeken = false)
+        private async Task<bool> WriteSpreadSheet(DateTime startDate, int startColumnIndex, int endColumnIndex, int rowIndex, string sheetId, string text = "x", bool isAllowWeeken = false, string spearchSheet = null)
         {
+            spearchSheet ??= spreadSheetId;
             string[][] values = new string[1][];
             int totalItem = (endColumnIndex - startColumnIndex);
             for (int i = 0; i < totalItem; i++)
@@ -113,7 +126,7 @@ namespace OrderRice.Services
 
             var json = JsonConvert.SerializeObject(payload);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpGoogleClient.PostAsync($"/v4/spreadsheets/{spreadSheetId}/values:batchUpdateByDataFilter", httpContent);
+            var response = await _httpGoogleClient.PostAsync($"/v4/spreadsheets/{spearchSheet}/values:batchUpdateByDataFilter", httpContent);
             return response.IsSuccessStatusCode;
         }
 
@@ -463,6 +476,71 @@ namespace OrderRice.Services
                 }
             }
             return false;
+        }
+
+        public async Task<bool> OrderTicket()
+        {
+            var currentDate = DateTime.Now;
+            var devSheetId = await FindSheetId(currentDate);
+            if (string.IsNullOrEmpty(devSheetId))
+            {
+                return false;
+            }
+            var devSpreadSheetData = await GetSpreadSheetData(devSheetId);
+            var devIndexCurrentDate = GetIndexDateColumn(devSpreadSheetData, currentDate);
+            if (devIndexCurrentDate == 0)
+            {
+                return false;
+            }
+
+            int totalTicket = 0;
+            for (int i = 0; i < devSpreadSheetData[devIndexCurrentDate].Count; i++)
+            {
+                if (devSpreadSheetData[devIndexCurrentDate][i].Equals("x", StringComparison.OrdinalIgnoreCase))
+                {
+                    totalTicket++;
+                }
+            }
+
+            if (totalTicket == 0)
+            {
+                return false;
+            }
+
+            var sheetId = await FindSheetId(dateTime: currentDate, spearchSheet: centralSpreadSheetId);
+            if (string.IsNullOrEmpty(sheetId))
+            {
+                throw new OrderServiceException("Không tìm thấy sheet đặt cơm của Trung tâm");
+            }
+            var spreadSheetData = await GetSpreadSheetData(sheetId, spearchSheet: centralSpreadSheetId);
+            int indexDevDepartment = -1;
+            for (int i = 0; i < spreadSheetData[0].Count; i++)
+            {
+                if (spreadSheetData[0][i].Equals("phòng phát triển", StringComparison.OrdinalIgnoreCase))
+                {
+                    indexDevDepartment = i;
+                    break;
+                }
+            }
+            if (indexDevDepartment == -1)
+            {
+                throw new Exception("Không tìm thấy sheet đặt cơm cho phòng Phát triển");
+            }
+            int indexCurrentDate = -1;
+            for (int i = 0; i < spreadSheetData.Count; i++)
+            {
+                if (spreadSheetData[i][0].StartsWith($"{currentDate:dd/MM}"))
+                {
+                    indexCurrentDate = i;
+                    break;
+                }
+            }
+            if (indexCurrentDate == -1)
+            {
+                throw new Exception("Hôm nay Trung tâm không hỗ trợ đặt cơm");
+            }
+            indexCurrentDate++;
+            return await WriteSpreadSheet(currentDate, indexCurrentDate, indexCurrentDate + 1, indexDevDepartment, sheetId, $"{totalTicket}", isAllowWeeken: true, spearchSheet: centralSpreadSheetId);
         }
     }
 }

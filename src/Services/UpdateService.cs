@@ -118,7 +118,10 @@ namespace OrderRice.Services
 
                 if (!response.Any())
                 {
-                    await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Không có đồng chí nào đặt phiếu ăn hôm nay");
+                    if (message.Chat is not { Username: "cronjob" })
+                    {
+                        await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Không có đồng chí nào đặt phiếu ăn hôm nay");
+                    }
                     return;
                 }
 
