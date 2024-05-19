@@ -1,4 +1,4 @@
-using Microsoft.Azure.Functions.Worker;
+﻿using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -38,7 +38,11 @@ namespace OrderRice.Functions
         {
             try
             {
-                await _orderService.OrderTicket();
+                (bool isSucess, int total) = await _orderService.OrderTicket();
+                if (isSucess)
+                {
+                    await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, $"Khầy đặt cơm cho ${total} đồng chí");
+                }
             }
             catch(Exception ex)
             {

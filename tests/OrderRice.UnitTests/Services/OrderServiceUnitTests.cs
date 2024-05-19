@@ -18,17 +18,19 @@ namespace OrderRice.UnitTests.Services
             _orderService = scope.ServiceProvider.GetService<IOrderService>();
         }
 
-        //[Fact]
-        //public async Task CreateOrderListImage_ShouldReturnUrl()
-        //{
-        //    // Action
-        //    var result = await _orderService.CreateOrderListImage("list");
-        //}
+        [Fact]
+        public async Task CreateOrderListImage_ShouldReturnListImages()
+        {
+            (List<(string, string)> list, _, _) = await _orderService.CreateOrderListImage("list");
+
+            Assert.NotNull(list);
+            Assert.NotEmpty(list);
+        }
 
         [Fact]
-        public async Task OrderUnitTest()
+        public async Task OrderTicket_ShouldReturnTrue()
         {
-            var result = await _orderService.OrderTicket();
+            await _orderService.OrderTicket();
         }
     }
 }

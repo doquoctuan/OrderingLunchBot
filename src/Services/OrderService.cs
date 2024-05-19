@@ -478,19 +478,19 @@ namespace OrderRice.Services
             return false;
         }
 
-        public async Task<bool> OrderTicket()
+        public async Task<(bool, int)> OrderTicket()
         {
             var currentDate = DateTime.Now;
             var devSheetId = await FindSheetId(currentDate);
             if (string.IsNullOrEmpty(devSheetId))
             {
-                return false;
+                return (false, 0);
             }
             var devSpreadSheetData = await GetSpreadSheetData(devSheetId);
             var devIndexCurrentDate = GetIndexDateColumn(devSpreadSheetData, currentDate);
             if (devIndexCurrentDate == 0)
             {
-                return false;
+                return (false, 0);
             }
 
             int totalTicket = 0;
@@ -504,7 +504,7 @@ namespace OrderRice.Services
 
             if (totalTicket == 0)
             {
-                return false;
+                return (false, 0);
             }
 
             var sheetId = await FindSheetId(dateTime: currentDate, spearchSheet: centralSpreadSheetId);
@@ -540,7 +540,7 @@ namespace OrderRice.Services
                 throw new Exception("Hôm nay Trung tâm không hỗ trợ đặt cơm");
             }
             indexCurrentDate++;
-            return await WriteSpreadSheet(currentDate, indexCurrentDate, indexCurrentDate + 1, indexDevDepartment, sheetId, $"{totalTicket}", isAllowWeeken: true, spearchSheet: centralSpreadSheetId);
+            return (await WriteSpreadSheet(currentDate, indexCurrentDate, indexCurrentDate + 1, indexDevDepartment, sheetId, $"{totalTicket}", isAllowWeeken: true, spearchSheet: centralSpreadSheetId), totalTicket);
         }
     }
 }
