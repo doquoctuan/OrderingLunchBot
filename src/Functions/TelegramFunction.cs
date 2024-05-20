@@ -41,7 +41,7 @@ namespace OrderRice.Functions
                 (bool isSucess, int total) = await _orderService.OrderTicket();
                 if (isSucess)
                 {
-                    await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, $"Khầy đặt cơm cho ${total} đồng chí");
+                    await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, $"Khầy đã đặt cơm cho {total} đồng chí");
                 }
             }
             catch(Exception ex)
