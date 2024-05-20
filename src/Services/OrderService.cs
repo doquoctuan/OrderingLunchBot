@@ -87,19 +87,19 @@ namespace OrderRice.Services
             return JsonConvert.DeserializeObject<List<List<string>>>(Convert.ToString(listResult));
         }
 
-        private async Task<bool> WriteSpreadSheet(DateTime startDate, int startColumnIndex, int endColumnIndex, int rowIndex, string sheetId, string text = "x", bool isAllowWeeken = false, string spearchSheet = null)
+        private async Task<bool> WriteSpreadSheet(DateTime startDate, int startColumnIndex, int endColumnIndex, int rowIndex, string sheetId, object val = default, bool isAllowWeeken = false, string spearchSheet = null)
         {
             spearchSheet ??= spreadSheetId;
-            string[][] values = new string[1][];
+            object[][] values = new object[1][];
             int totalItem = (endColumnIndex - startColumnIndex);
             for (int i = 0; i < totalItem; i++)
             {
                 if (i == 0)
                 {
-                    values[i] = new string[totalItem];
+                    values[i] = new object[totalItem];
                 }
                 var isWeeken = startDate.DayOfWeek == DayOfWeek.Sunday || startDate.DayOfWeek == DayOfWeek.Saturday;
-                values[0][i] = !isWeeken || isAllowWeeken ? text : string.Empty;
+                values[0][i] = !isWeeken || isAllowWeeken ? val : string.Empty;
                 startDate = startDate.AddDays(1);
             }
 
@@ -472,7 +472,7 @@ namespace OrderRice.Services
                 if (spreadSheetData[0][i].Contains(fullName, StringComparison.OrdinalIgnoreCase))
                 {
                     int CHECKPAYMENT_COLUMN = 2;
-                    return await WriteSpreadSheet(DateTime.Now, CHECKPAYMENT_COLUMN, CHECKPAYMENT_COLUMN + 1, i, prevSheetId, isAllowWeeken: true);
+                    return await WriteSpreadSheet(DateTime.Now, CHECKPAYMENT_COLUMN, CHECKPAYMENT_COLUMN + 1, i, prevSheetId, val: "x", isAllowWeeken: true);
                 }
             }
             return false;
@@ -540,7 +540,7 @@ namespace OrderRice.Services
                 throw new Exception("Hôm nay Trung tâm không hỗ trợ đặt cơm");
             }
             indexCurrentDate++;
-            return (await WriteSpreadSheet(currentDate, indexCurrentDate, indexCurrentDate + 1, indexDevDepartment, sheetId, $"{totalTicket}", isAllowWeeken: true, spearchSheet: centralSpreadSheetId), totalTicket);
+            return (await WriteSpreadSheet(currentDate, indexCurrentDate, indexCurrentDate + 1, indexDevDepartment, sheetId, val: totalTicket, isAllowWeeken: true, spearchSheet: centralSpreadSheetId), totalTicket);
         }
     }
 }
