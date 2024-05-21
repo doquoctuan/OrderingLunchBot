@@ -198,7 +198,7 @@ namespace OrderRice.Services
             for (int i = 0; i < datas[indexCurrentDate].Count; i++)
             {
                 statusPaid = "";
-                if (datas[indexCurrentDate][i].Equals("x", StringComparison.OrdinalIgnoreCase))
+                if (datas[indexCurrentDate][i].Trim().Equals("x", StringComparison.OrdinalIgnoreCase))
                 {
                     var name = datas[0][i];
                     AddList(floor16, floor19, name);
@@ -496,7 +496,7 @@ namespace OrderRice.Services
             int totalTicket = 0;
             for (int i = 0; i < devSpreadSheetData[devIndexCurrentDate].Count; i++)
             {
-                if (devSpreadSheetData[devIndexCurrentDate][i].Equals("x", StringComparison.OrdinalIgnoreCase))
+                if (devSpreadSheetData[devIndexCurrentDate][i].Trim().Equals("x", StringComparison.OrdinalIgnoreCase))
                 {
                     totalTicket++;
                 }

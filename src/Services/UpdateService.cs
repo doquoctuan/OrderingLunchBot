@@ -47,8 +47,6 @@ namespace OrderRice.Services
 
         public async Task HandleMessageAsync(Update update)
         {
-            _logger.LogInformation("Invoke Telegram HandleMessageAsync function");
-
             if (update is null)
                 return;
 

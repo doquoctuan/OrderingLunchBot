@@ -84,7 +84,6 @@ namespace OrderRice.Functions
         [Function(nameof(TelegramWebhook))]
         public async Task<HttpResponseData> TelegramWebhook([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData request)
         {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
             var response = request.CreateResponse(HttpStatusCode.OK);
             try
             {
@@ -105,6 +104,7 @@ namespace OrderRice.Functions
             catch (Exception e)
             {
                 _logger.LogError("Exception: {Message}", e.Message);
+                await _botClient.SendTextMessageAsync(chatId: 5664769574, e.Message);
             }
 
             return response;
