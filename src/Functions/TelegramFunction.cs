@@ -104,7 +104,6 @@ namespace OrderRice.Functions
             catch (Exception e)
             {
                 _logger.LogError("Exception: {Message}", e.Message);
-                await _botClient.SendTextMessageAsync(chatId: 5664769574, e.Message);
             }
 
             return response;
