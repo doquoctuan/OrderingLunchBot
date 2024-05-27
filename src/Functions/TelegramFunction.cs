@@ -1,10 +1,10 @@
-﻿using Microsoft.Azure.Functions.Worker;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OrderRice.Interfaces;
 using OrderRice.Services;
-using System.Net;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -44,7 +44,7 @@ namespace OrderRice.Functions
                     await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, $"Khầy đã đặt cơm cho {total} đồng chí");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
                 await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, ex.Message);
@@ -82,9 +82,8 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(TelegramWebhook))]
-        public async Task<HttpResponseData> TelegramWebhook([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData request)
+        public async Task<IActionResult> TelegramWebhook([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData request)
         {
-            var response = request.CreateResponse(HttpStatusCode.OK);
             try
             {
                 var body = await request.ReadAsStringAsync() ?? throw new ArgumentNullException(nameof(request));
@@ -92,7 +91,7 @@ namespace OrderRice.Functions
                 if (update is null)
                 {
                     _logger.LogWarning("Unable to deserialize Update object.");
-                    return response;
+                    return new OkObjectResult("OK");
                 }
 
                 await _updateService.HandleMessageAsync(update);
@@ -106,7 +105,7 @@ namespace OrderRice.Functions
                 _logger.LogError("Exception: {Message}", e.Message);
             }
 
-            return response;
+            return new OkObjectResult("OK");
         }
     }
 }
