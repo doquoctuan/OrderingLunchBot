@@ -5,16 +5,11 @@ using System.Net.Http.Json;
 
 namespace OrderRice.Services
 {
-    public class GithubService
+    public class GithubService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
-        private readonly HttpClient _httpClient;
-        private readonly string DEFAULT_REPOSITORY_URL;
+        private readonly HttpClient _httpClient = httpClientFactory.CreateClient("github_client");
+        private readonly string DEFAULT_REPOSITORY_URL = $"repos/{configuration["GITHUB_REPOSITORY_NAME"]}/contents";
         private const string DEFAULT_BRANCH = "images";
-        public GithubService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
-        {
-            _httpClient = httpClientFactory.CreateClient("github_client");
-            DEFAULT_REPOSITORY_URL = $"repos/{configuration["GITHUB_REPOSITORY_NAME"]}/contents";
-        }
 
         public async Task<GitResponseModel> UploadImageAsync(string imageBase64, string folderSource = "default", string prefixName = "unknown")
         {

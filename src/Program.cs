@@ -18,7 +18,7 @@ var githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN", Environment
     ?? throw new ArgumentException("Can not get githubToken. Set githubToken in environment setting");
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults(workerApplication =>
+    .ConfigureFunctionsWebApplication(workerApplication =>
     {
         workerApplication.UseWhen<TelegramAuthenticationMiddleware>((context) =>
         {
