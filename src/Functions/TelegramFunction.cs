@@ -7,6 +7,7 @@ using OrderRice.Interfaces;
 using OrderRice.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace OrderRice.Functions
 {
@@ -79,6 +80,23 @@ namespace OrderRice.Functions
                 Message = new() { Text = "/menu", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
             };
             await _updateService.HandleMessageAsync(update);
+        }
+
+        [Function(nameof(AutoDisciplineReminder))]
+        public async Task AutoDisciplineReminder([TimerTrigger("0 0 17 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        {
+            await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, $@"
+                                ## Thông Báo Nhắc Nhở
+                                #### Xin chào các anh/chị,
+                                
+                                Trước khi ra về, vui lòng thực hiện các công việc sau:
+                                
+                                1. Khai báo và cập nhật CV trên Jira.
+                                2. Sắp xếp lại ghế ngồi gọn gàng.
+                                3. Vệ sinh khu vực làm việc.
+                                4. Tắt màn hình máy tính.
+                                
+                                Xin cảm ơn sự hợp tác của các **anh/chị**", parseMode: ParseMode.MarkdownV2);
         }
 
         [Function(nameof(TelegramWebhook))]
