@@ -72,6 +72,16 @@ namespace OrderRice.Functions
             await _updateService.HandleMessageAsync(update);
         }
 
+        [Function(nameof(AutoSendDebtorHourly))]
+        public async Task AutoSendDebtorHourly([TimerTrigger("0 0 * * * *")] TimerInfo timerInfo, FunctionContext context)
+        {
+            Update update = new()
+            {
+                Message = new() { Text = "/debtor", Chat = new() { Id = -1001286076862, Username = "cronjob" } }
+            };
+            await _updateService.HandleMessageAsync(update);
+        }
+
         [Function(nameof(AutoSendMenuDaily))]
         public async Task AutoSendMenuDaily([TimerTrigger("0 0 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
