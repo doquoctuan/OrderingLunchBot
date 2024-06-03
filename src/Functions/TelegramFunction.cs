@@ -73,7 +73,7 @@ namespace OrderRice.Functions
         }
 
         [Function(nameof(AutoSendDebtorHourly))]
-        public async Task AutoSendDebtorHourly([TimerTrigger("0 0 * * * *")] TimerInfo timerInfo, FunctionContext context)
+        public async Task AutoSendDebtorHourly([TimerTrigger("0 0 8,17 * * *")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {
