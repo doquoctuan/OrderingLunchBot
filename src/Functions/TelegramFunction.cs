@@ -43,7 +43,7 @@ namespace OrderRice.Functions
                 if (isSucess)
                 {
                     await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, $"Khầy đã đặt cơm cho {total} đồng chí");
-                }
+                } else throw new Exception("Không thể đặt cơm cho phòng Phát triển");
             }
             catch (Exception ex)
             {
@@ -68,16 +68,6 @@ namespace OrderRice.Functions
             Update update = new()
             {
                 Message = new() { Text = "/debtor", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
-            };
-            await _updateService.HandleMessageAsync(update);
-        }
-
-        [Function(nameof(AutoSendDebtorHourly))]
-        public async Task AutoSendDebtorHourly([TimerTrigger("0 0 8,17 * * *")] TimerInfo timerInfo, FunctionContext context)
-        {
-            Update update = new()
-            {
-                Message = new() { Text = "/debtor", Chat = new() { Id = -1001286076862, Username = "cronjob" } }
             };
             await _updateService.HandleMessageAsync(update);
         }
