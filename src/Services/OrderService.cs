@@ -396,8 +396,7 @@ namespace OrderRice.Services
 
                     foreach (var l in list)
                     {
-                        // image.Mutate(ctx => ctx.DrawText($"{l.Value.Item2 * 30}K", font, color, location: new PointF(1100, start + step)));
-                        image.Mutate(ctx => ctx.DrawText($"156.500", font, color, location: new PointF(1100, start + step)));
+                        image.Mutate(ctx => ctx.DrawText($"{l.Value.Item2 * 30}K", font, color, location: new PointF(1100, start + step)));
                         image.Mutate(ctx => ctx.DrawText($"{index}", font, color, location: new PointF(index < 10 ? 252 : 240, start + step)));
                         image.Mutate(ctx => ctx.DrawText(l.Value.Item1, font, color, location: new PointF(390, start + step)));
                         step += 59;
