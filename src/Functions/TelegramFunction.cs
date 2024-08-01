@@ -28,56 +28,12 @@ namespace OrderRice.Functions
             _botClient = botClient;
         }
 
-        [Function(nameof(AutoProtectedSheetDaily))]
-        public async Task AutoProtectedSheetDaily([TimerTrigger("0 59 8 * * *")] TimerInfo timerInfo, FunctionContext context)
-        {
-            await _orderService.BlockOrderTicket();
-        }
-
-        [Function(nameof(AutoOrderTicketDaily))]
-        public async Task AutoOrderTicketDaily([TimerTrigger("0 0 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
-        {
-            try
-            {
-                (bool isSucess, int total) = await _orderService.OrderTicket();
-                if (isSucess)
-                {
-                    await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, $"Khầy đã đặt cơm cho {total} đồng chí");
-                } else throw new Exception("Không thể đặt cơm cho phòng Phát triển");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message, ex);
-                await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, ex.Message);
-            }
-        }
-
-        [Function(nameof(AutoSendListDaily))]
-        public async Task AutoSendListDaily([TimerTrigger("0 30 9 * * *")] TimerInfo timerInfo, FunctionContext context)
-        {
-            Update update = new()
-            {
-                Message = new() { Text = "/list", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
-            };
-            await _updateService.HandleMessageAsync(update);
-        }
-
         [Function(nameof(AutoSendDebtorDaily))]
         public async Task AutoSendDebtorDaily([TimerTrigger("0 10 8 * * *")] TimerInfo timerInfo, FunctionContext context)
         {
             Update update = new()
             {
                 Message = new() { Text = "/debtor", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
-            };
-            await _updateService.HandleMessageAsync(update);
-        }
-
-        [Function(nameof(AutoSendMenuDaily))]
-        public async Task AutoSendMenuDaily([TimerTrigger("0 0 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
-        {
-            Update update = new()
-            {
-                Message = new() { Text = "/menu", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
             };
             await _updateService.HandleMessageAsync(update);
         }
