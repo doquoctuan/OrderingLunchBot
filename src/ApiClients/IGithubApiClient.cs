@@ -1,6 +1,6 @@
 ﻿using Refit;
 
-namespace OrderRice.ApiClients
+namespace OrderLunch.ApiClients
 {
     public interface IGithubApiClient
     {

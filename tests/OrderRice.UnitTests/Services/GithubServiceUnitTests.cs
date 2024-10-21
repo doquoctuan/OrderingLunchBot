@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using OrderRice.Services;
+using OrderLunch.Services;
+using OrderLunch.UnitTests;
 
-namespace OrderRice.UnitTests.Services
+namespace OrderLunch.UnitTests.Services
 {
     public class GithubServiceUnitTests : IClassFixture<DependencySetupFixture>
     {

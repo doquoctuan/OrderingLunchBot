@@ -1,7 +1,7 @@
-﻿using OrderRice.Entities;
+﻿using OrderLunch.Entities;
 using System.Globalization;
 
-namespace OrderRice.GoogleSheetModels
+namespace OrderLunch.GoogleSheetModels
 {
     public static class UsersMapper
     {

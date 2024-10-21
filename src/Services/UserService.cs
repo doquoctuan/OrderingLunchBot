@@ -1,8 +1,8 @@
-﻿using OrderRice.Entities;
-using OrderRice.Interfaces;
-using OrderRice.Persistence;
+﻿using OrderLunch.Entities;
+using OrderLunch.Interfaces;
+using OrderLunch.Persistence;
 
-namespace OrderRice.Services
+namespace OrderLunch.Services
 {
     public class UserService : IUserService
     {

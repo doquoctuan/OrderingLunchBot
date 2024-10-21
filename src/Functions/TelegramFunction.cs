@@ -3,13 +3,12 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using OrderRice.Interfaces;
-using OrderRice.Services;
+using OrderLunch.Interfaces;
+using OrderLunch.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
-namespace OrderRice.Functions
+namespace OrderLunch.Functions
 {
     public class TelegramFunction
     {
@@ -36,23 +35,6 @@ namespace OrderRice.Functions
                 Message = new() { Text = "/debtor", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
             };
             await _updateService.HandleMessageAsync(update);
-        }
-
-        [Function(nameof(AutoDisciplineReminder))]
-        public async Task AutoDisciplineReminder([TimerTrigger("0 0 17 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
-        {
-            await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, $@"
-<b>Thông Báo Nhắc Nhở</b>
-
-Xin chào các <b>đồng chí,</b>
-
-Trước khi ra về, vui lòng thực hiện các công việc sau:
-<b>1. Khai báo và cập nhật CV trên Jira.</b>
-<b>2. Sắp xếp lại ghế ngồi gọn gàng.</b>
-<b>3. Vệ sinh khu vực làm việc.</b>
-<b>4. Tắt màn hình máy tính.</b>
-
-Xin cảm ơn sự hợp tác của các <b>đồng chí</b>", parseMode: ParseMode.Html);
         }
 
         [Function(nameof(TelegramWebhook))]

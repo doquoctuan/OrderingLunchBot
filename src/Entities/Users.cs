@@ -1,4 +1,4 @@
-﻿namespace OrderRice.Entities
+﻿namespace OrderLunch.Entities
 {
     public class Users : BaseEntity<Guid>
     {
@@ -16,16 +16,16 @@
         public int Floor { get; set; }
         public string GetDayIn()
         {
-            return this.DayIn.ToString("dd/MM/yyyy");
+            return DayIn.ToString("dd/MM/yyyy");
         }
 
         public string GetBirthday()
         {
-            return this.Birthday.ToString("dd/MM/yyyy");
+            return Birthday.ToString("dd/MM/yyyy");
         }
         public string GetIsBlacklist()
         {
-            return this.IsBlacklist == true ? "x" : string.Empty;
+            return IsBlacklist == true ? "x" : string.Empty;
         }
     }
 }

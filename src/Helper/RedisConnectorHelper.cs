@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using StackExchange.Redis;
 
-namespace OrderRice.Helper
+namespace OrderLunch.Helper
 {
     public class RedisConnectorHelper
     {

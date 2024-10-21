@@ -1,10 +1,10 @@
 ﻿using Google.Apis.Sheets.v4;
 using Microsoft.Extensions.Logging;
-using OrderRice.Entities;
-using OrderRice.GoogleSheetModels;
-using OrderRice.Persistence;
+using OrderLunch.Entities;
+using OrderLunch.GoogleSheetModels;
+using OrderLunch.Persistence;
 
-namespace OrderRice.Extentions
+namespace OrderLunch.Extentions
 {
     public static class OrderLunchDbContextSeed
     {

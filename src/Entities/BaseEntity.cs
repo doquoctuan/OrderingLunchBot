@@ -1,4 +1,4 @@
-﻿namespace OrderRice.Entities
+﻿namespace OrderLunch.Entities
 {
     public abstract class BaseEntity<TId>
     {

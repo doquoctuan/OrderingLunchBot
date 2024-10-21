@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
-using OrderRice.Helper;
-using OrderRice.Interfaces;
+using OrderLunch;
+using OrderLunch.Helper;
+using OrderLunch.Interfaces;
 
-namespace OrderRice.Services
+namespace OrderLunch.Services
 {
     public class CachedGoogleAuthService : IGoogleAuthService
     {

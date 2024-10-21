@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OrderRice.Interfaces
+namespace OrderLunch.Interfaces
 {
     public interface IGoogleAuthService
     {

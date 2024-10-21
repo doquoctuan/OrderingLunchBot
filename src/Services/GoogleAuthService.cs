@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using OrderRice.Helper;
-using OrderRice.Interfaces;
-using OrderRice.ResponseModels;
+using OrderLunch;
+using OrderLunch.Helper;
+using OrderLunch.Interfaces;
+using OrderLunch.ResponseModels;
 
-namespace OrderRice.Services
+namespace OrderLunch.Services
 {
     public class GoogleAuthService : IGoogleAuthService
     {

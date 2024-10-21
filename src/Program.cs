@@ -1,11 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OrderRice;
-using OrderRice.Helper;
-using OrderRice.Interfaces;
-using OrderRice.Middlewares;
-using OrderRice.Persistence;
-using OrderRice.Services;
+using OrderLunch;
+using OrderLunch.Helper;
+using OrderLunch.Interfaces;
+using OrderLunch.Middlewares;
+using OrderLunch.Persistence;
+using OrderLunch.Services;
 using Telegram.Bot;
 
 var tgToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.Process)

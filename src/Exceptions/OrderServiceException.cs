@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OrderRice.Exceptions
+namespace OrderLunch.Exceptions
 {
     public class OrderServiceException : Exception
     {

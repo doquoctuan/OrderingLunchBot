@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OrderRice.Entities;
+using OrderLunch.Entities;
 
-namespace OrderRice.Persistence
+namespace OrderLunch.Persistence
 {
     public class OrderLunchDbContext : DbContext
     {

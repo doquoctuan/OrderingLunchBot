@@ -1,6 +1,6 @@
-﻿using OrderRice.Entities;
+﻿using OrderLunch.Entities;
 
-namespace OrderRice.Interfaces
+namespace OrderLunch.Interfaces
 {
     public interface IUserService
     {

@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System.Web;
 
-namespace OrderRice.Helper
+namespace OrderLunch.Helper
 {
     public static class StringUtils
     {

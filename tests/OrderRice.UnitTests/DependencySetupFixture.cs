@@ -1,13 +1,14 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OrderRice.Extentions;
-using OrderRice.Helper;
-using OrderRice.Interfaces;
-using OrderRice.Persistence;
-using OrderRice.Services;
+using OrderLunch;
+using OrderLunch.Helper;
+using OrderLunch.Interfaces;
+using OrderLunch.Persistence;
+using OrderLunch.Services;
+using OrderLunch.Extentions;
 using Telegram.Bot;
 
-namespace OrderRice.UnitTests
+namespace OrderLunch.UnitTests
 {
     public class DependencySetupFixture
     {

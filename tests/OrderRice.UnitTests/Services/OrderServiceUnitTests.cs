@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using OrderRice.Interfaces;
+using OrderLunch.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OrderRice.UnitTests.Services
+namespace OrderLunch.UnitTests.Services
 {
     public class OrderServiceUnitTests : IClassFixture<DependencySetupFixture>
     {

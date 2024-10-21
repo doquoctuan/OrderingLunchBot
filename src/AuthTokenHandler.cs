@@ -1,7 +1,7 @@
-﻿using OrderRice.Interfaces;
+﻿using OrderLunch.Interfaces;
 using System.Net.Http.Headers;
 
-namespace OrderRice
+namespace OrderLunch
 {
     public class AuthTokenHandler : DelegatingHandler
     {

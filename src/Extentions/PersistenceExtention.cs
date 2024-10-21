@@ -2,12 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OrderRice.Helper;
-using OrderRice.Interfaces;
-using OrderRice.Persistence;
-using OrderRice.Services;
+using OrderLunch.Helper;
+using OrderLunch.Interfaces;
+using OrderLunch.Persistence;
+using OrderLunch.Services;
 
-namespace OrderRice.Extentions
+namespace OrderLunch.Extentions
 {
     public static class PersistenceExtention
     {

@@ -4,7 +4,7 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Microsoft.Extensions.Configuration;
 
-namespace OrderRice.Helper
+namespace OrderLunch.Helper
 {
     public class GoogleSheetsHelper
     {

@@ -2,11 +2,11 @@
 using Google.Apis.Sheets.v4.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using OrderRice.Entities;
-using OrderRice.Exceptions;
-using OrderRice.Helper;
-using OrderRice.Interfaces;
-using OrderRice.Persistence;
+using OrderLunch.Entities;
+using OrderLunch.Exceptions;
+using OrderLunch.Helper;
+using OrderLunch.Interfaces;
+using OrderLunch.Persistence;
 using System.Data;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,7 +14,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
 
-namespace OrderRice.Services
+namespace OrderLunch.Services
 {
     public class UpdateService
     {
@@ -259,7 +259,7 @@ namespace OrderRice.Services
                             .Users
                             .Where(x => x.UserName.Equals(messageText) || x.TelegramId.Equals(telegramId)).ToList();
 
-            if ((users is null || !users.Any()))
+            if (users is null || !users.Any())
             {
                 return new(false, null);
             }

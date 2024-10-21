@@ -1,4 +1,4 @@
-﻿namespace OrderRice
+﻿namespace OrderLunch
 {
     public class Constants
     {

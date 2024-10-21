@@ -1,11 +1,11 @@
 ﻿using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Microsoft.Extensions.Configuration;
-using OrderRice.Entities;
-using OrderRice.GoogleSheetModels;
-using OrderRice.Helper;
+using OrderLunch.Entities;
+using OrderLunch.GoogleSheetModels;
+using OrderLunch.Helper;
 
-namespace OrderRice.Persistence
+namespace OrderLunch.Persistence
 {
     public class GoogleSheetContext
     {
@@ -38,11 +38,15 @@ namespace OrderRice.Persistence
                 },
                 WarningOnly = false,
                 Description = "Quá thời gian đặt/huỷ cơm",
-                Editors = new Editors { DomainUsersCanEdit = false, Users = new List<string> {
+                Editors = new Editors
+                {
+                    DomainUsersCanEdit = false,
+                    Users = new List<string> {
                     "phongphattrientest@gmail.com",
                     "vts-telebot@vts-tele-bot.iam.gserviceaccount.com",
                     "phongphattriengpmn@gmail.com",
-                } },
+                }
+                },
             };
 
             // Create the request

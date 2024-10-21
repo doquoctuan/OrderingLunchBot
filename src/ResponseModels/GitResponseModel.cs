@@ -1,34 +1,34 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace OrderRice.ResponseModels
+namespace OrderLunch.ResponseModels
 {
     public class GitResponseModel
     {
-        [JsonPropertyName("content")] 
+        [JsonPropertyName("content")]
         public ContentResponse Content { get; set; }
     }
 
     public class ContentResponse
     {
-        [JsonPropertyName("name")] 
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonPropertyName("path")] 
+        [JsonPropertyName("path")]
         public string Path { get; set; }
 
-        [JsonPropertyName("sha")] 
+        [JsonPropertyName("sha")]
         public string Sha { get; set; }
 
-        [JsonPropertyName("size")] 
+        [JsonPropertyName("size")]
         public int Size { get; set; }
 
-        [JsonPropertyName("url")] 
+        [JsonPropertyName("url")]
         public string Url { get; set; }
 
-        [JsonPropertyName("downloadUrl")] 
+        [JsonPropertyName("downloadUrl")]
         public string DownloadUrl { get; set; }
 
-        [JsonPropertyName("type")] 
+        [JsonPropertyName("type")]
         public string Type { get; set; }
     }
 }

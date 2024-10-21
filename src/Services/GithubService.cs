@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using OrderRice.ResponseModels;
+using OrderLunch.ResponseModels;
 using System.Net.Http.Json;
 
-namespace OrderRice.Services
+namespace OrderLunch.Services
 {
     public class GithubService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {

@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using OrderRice.Exceptions;
-using OrderRice.Interfaces;
-using OrderRice.Persistence;
+using OrderLunch.Interfaces;
+using OrderLunch.Persistence;
+using OrderLunch.Exceptions;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -14,7 +14,7 @@ using SixLabors.ImageSharp.Processing;
 using System.Text;
 using Color = SixLabors.ImageSharp.Color;
 
-namespace OrderRice.Services
+namespace OrderLunch.Services
 {
     public class OrderService : IOrderService
     {
@@ -91,7 +91,7 @@ namespace OrderRice.Services
         {
             spearchSheet ??= spreadSheetId;
             object[][] values = new object[1][];
-            int totalItem = (endColumnIndex - startColumnIndex);
+            int totalItem = endColumnIndex - startColumnIndex;
             for (int i = 0; i < totalItem; i++)
             {
                 if (i == 0)

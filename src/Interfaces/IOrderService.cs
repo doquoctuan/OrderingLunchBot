@@ -1,4 +1,4 @@
-﻿namespace OrderRice.Interfaces
+﻿namespace OrderLunch.Interfaces
 {
     public interface IOrderService
     {
