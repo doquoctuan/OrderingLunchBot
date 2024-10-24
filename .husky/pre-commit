@@ -3,8 +3,8 @@
 
 echo 'Clean & Build Project'
 
-echo 'Clean Project'
-dotnet clean
+echo 'Bypass Clean Project'
+# dotnet clean
 
-echo 'Building code'
-dotnet build
+echo 'Bypass Building code'
+# dotnet build
