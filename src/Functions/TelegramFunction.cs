@@ -10,21 +10,78 @@ using Telegram.Bot.Types;
 
 namespace OrderLunch.Functions
 {
-    public class TelegramFunction
+    public class TelegramFunction(
+        ILogger<TelegramFunction> logger,
+        UpdateService updateService,
+        IOrderService orderService,
+        ITelegramBotClient botClient)
     {
-        private readonly ILogger<TelegramFunction> _logger;
-        private readonly UpdateService _updateService;
-        private readonly IOrderService _orderService;
+        private readonly ILogger<TelegramFunction> _logger = logger;
+        private readonly UpdateService _updateService = updateService;
+        private readonly IOrderService _orderService = orderService;
         private const long DEVELOPMENT_DEPARMENT_ID = -1002094428444;
-        private readonly ITelegramBotClient _botClient;
+        private readonly ITelegramBotClient _botClient = botClient;
 
-        public TelegramFunction(ILogger<TelegramFunction> logger, UpdateService updateService, IOrderService orderService,
-            ITelegramBotClient botClient)
+        [Function(nameof(TelegramWebhook))]
+        public async Task<IActionResult> TelegramWebhook([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData request)
         {
-            _logger = logger;
-            _updateService = updateService;
-            _orderService = orderService;
-            _botClient = botClient;
+            try
+            {
+                var body = await request.ReadAsStringAsync() ?? throw new ArgumentNullException(nameof(request));
+                var update = JsonConvert.DeserializeObject<Update>(body);
+                if (update is null)
+                {
+                    _logger.LogError("Unable to deserialize Update object.");
+                    return new OkObjectResult("OK");
+                }
+
+                await _updateService.HandleMessageAsync(update);
+            }
+            catch (ArgumentNullException)
+            {
+                _logger.LogError("Not Telegram calling webhook");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Exception: {Message}\n {StackTrace}", e.Message, e.StackTrace);
+            }
+
+            return new OkObjectResult("OK");
+        }
+
+        [Function(nameof(AutoProtectedSheetDaily))]
+        public async Task AutoProtectedSheetDaily([TimerTrigger("0 59 8 * * *")] TimerInfo timerInfo, FunctionContext context)
+        {
+            await _orderService.BlockOrderTicket();
+        }
+
+        [Function(nameof(AutoOrderTicketDaily))]
+        public async Task AutoOrderTicketDaily([TimerTrigger("0 0 9 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
+        {
+            try
+            {
+                (bool isSucess, int total) = await _orderService.OrderTicket();
+                if (isSucess)
+                {
+                    await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, $"Khầy đã đặt cơm cho {total} đồng chí");
+                }
+                else throw new Exception("Không thể đặt cơm cho phòng Phát triển");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, ex.Message);
+            }
+        }
+
+        [Function(nameof(AutoSendListDaily))]
+        public async Task AutoSendListDaily([TimerTrigger("0 30 9 * * *")] TimerInfo timerInfo, FunctionContext context)
+        {
+            Update update = new()
+            {
+                Message = new() { Text = "/list", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
+            };
+            await _updateService.HandleMessageAsync(update);
         }
 
         [Function(nameof(AutoSendDebtorDaily))]
@@ -37,31 +94,14 @@ namespace OrderLunch.Functions
             await _updateService.HandleMessageAsync(update);
         }
 
-        [Function(nameof(TelegramWebhook))]
-        public async Task<IActionResult> TelegramWebhook([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData request)
+        [Function(nameof(AutoSendMenuDaily))]
+        public async Task AutoSendMenuDaily([TimerTrigger("0 0 8 * * 1-5")] TimerInfo timerInfo, FunctionContext context)
         {
-            try
+            Update update = new()
             {
-                var body = await request.ReadAsStringAsync() ?? throw new ArgumentNullException(nameof(request));
-                var update = JsonConvert.DeserializeObject<Update>(body);
-                if (update is null)
-                {
-                    _logger.LogWarning("Unable to deserialize Update object.");
-                    return new OkObjectResult("OK");
-                }
-
-                await _updateService.HandleMessageAsync(update);
-            }
-            catch (ArgumentNullException)
-            {
-                _logger.LogError("Not Telegram calling webhook");
-            }
-            catch (Exception e)
-            {
-                _logger.LogError("Exception: {Message}", e.Message);
-            }
-
-            return new OkObjectResult("OK");
+                Message = new() { Text = "/menu", Chat = new() { Id = DEVELOPMENT_DEPARMENT_ID, Username = "cronjob" } }
+            };
+            await _updateService.HandleMessageAsync(update);
         }
     }
 }

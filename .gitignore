@@ -491,3 +491,5 @@ serviceDependencies*
 # NPM
 
 package-lock.json
+src/output/*
+terraform/.*

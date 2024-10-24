@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderLunch;
@@ -8,14 +9,11 @@ using OrderLunch.Persistence;
 using OrderLunch.Services;
 using Telegram.Bot;
 
-var tgToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.Process)
-    ?? throw new ArgumentException("Can not get token. Set token in environment setting");
-
-var repositoryUrl = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY_URL", EnvironmentVariableTarget.Process)
-    ?? throw new ArgumentException("Can not get repository url. Set repository url in environment setting");
+var telegramToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.Process)
+    ?? throw new ArgumentException("Can not get telegram token. Set TELEGRAM_BOT_TOKEN in environment setting");
 
 var githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN", EnvironmentVariableTarget.Process)
-    ?? throw new ArgumentException("Can not get githubToken. Set githubToken in environment setting");
+    ?? throw new ArgumentException("Can not get githubToken. Set GITHUB_TOKEN in environment setting");
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication(workerApplication =>
@@ -23,19 +21,26 @@ var host = new HostBuilder()
         workerApplication.UseWhen<TelegramAuthenticationMiddleware>((context) =>
         {
             // We want to use this middleware only for http trigger invocations.
-            return context.FunctionDefinition.Name.Equals("TelegramWebhook")
+            return context.FunctionDefinition.Name.Equals(Constants.TELEGRAM_HOOK_NAME)
                 && context.FunctionDefinition.InputBindings.Values
                           .First(a => a.Type.EndsWith("Trigger")).Type == "httpTrigger";
         });
     })
+    .ConfigureAppConfiguration((hostContext, config) =>
+    {
+        if (hostContext.HostingEnvironment.IsDevelopment())
+        {
+            config.AddUserSecrets<Program>();
+        }
+    })
     .ConfigureServices(serviceCollection =>
     {
         serviceCollection.AddHttpClient("telegram_client")
-            .AddTypedClient<ITelegramBotClient>(httpClient => new TelegramBotClient(tgToken, httpClient));
+            .AddTypedClient<ITelegramBotClient>(httpClient => new TelegramBotClient(telegramToken, httpClient));
 
         serviceCollection.AddHttpClient("github_client", c =>
         {
-            c.BaseAddress = new Uri(repositoryUrl);
+            c.BaseAddress = new Uri("https://api.github.com");
             c.DefaultRequestHeaders.Add("Authorization", $"Token {githubToken}");
             c.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
             c.DefaultRequestHeaders.Add("User-Agent", "PostmanRuntime/7.36.3");

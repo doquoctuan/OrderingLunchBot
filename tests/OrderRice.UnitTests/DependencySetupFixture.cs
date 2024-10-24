@@ -1,11 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OrderLunch;
 using OrderLunch.Helper;
 using OrderLunch.Interfaces;
 using OrderLunch.Persistence;
 using OrderLunch.Services;
-using OrderLunch.Extentions;
 using Telegram.Bot;
 
 namespace OrderLunch.UnitTests
@@ -39,7 +37,7 @@ namespace OrderLunch.UnitTests
 
             serviceCollection.AddHttpClient("github_client", c =>
             {
-                c.BaseAddress = new Uri(Configuration["GITHUB_REPOSITORY_URL"]);
+                c.BaseAddress = new Uri("https://api.github.com");
                 c.DefaultRequestHeaders.Add("Authorization", $"Token {Configuration["GITHUB_TOKEN"]}");
                 c.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
                 c.DefaultRequestHeaders.Add("User-Agent", "PostmanRuntime/7.36.3");

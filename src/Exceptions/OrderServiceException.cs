@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.Serialization;
 
 namespace OrderLunch.Exceptions
 {
@@ -18,10 +13,6 @@ namespace OrderLunch.Exceptions
         }
 
         public OrderServiceException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        protected OrderServiceException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

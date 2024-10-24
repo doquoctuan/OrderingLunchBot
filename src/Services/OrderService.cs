@@ -48,7 +48,7 @@ namespace OrderLunch.Services
 
         private async Task<string> FindSheetId(DateTime dateTime, string spearchSheet = null)
         {
-            string searchPattern = $"Tháng {dateTime:M/yyyy}";
+            string searchPattern = $"T{dateTime:M.yyyy}";
             if (spearchSheet is null)
             {
                 spearchSheet = spreadSheetId;

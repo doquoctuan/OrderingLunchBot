@@ -11,7 +11,7 @@ namespace OrderLunch.ApiClients
             return Execute(() => _githubApiClient.GetUser(user));
         }
 
-        private async Task<T> Execute<T>(Func<Task<ApiResponse<T>>> func)
+        private static async Task<T> Execute<T>(Func<Task<ApiResponse<T>>> func)
         {
             ApiResponse<T> response;
 
@@ -27,20 +27,24 @@ namespace OrderLunch.ApiClients
             return response.Content;
         }
 
-        private static MyApiException MapException(ApiException ex)
+        private static GithubApiException MapException(ApiException ex)
         {
             return ex.StatusCode switch
             {
-                System.Net.HttpStatusCode.InternalServerError => new MyApiServerErrorException(ex),
-                System.Net.HttpStatusCode.Forbidden => new MyApiForbiddenException(ex),
+                System.Net.HttpStatusCode.InternalServerError => new GithubApiServerErrorException(ex),
+                System.Net.HttpStatusCode.Forbidden => new GithubApiForbiddenException(ex),
                 // more cases..
-                _ => new MyApiException(ex),
+                _ => new GithubApiException(ex),
             };
         }
     }
 
     // Custom Exceptions
-    public class MyApiException(ApiException ApiException) : Exception;
-    public class MyApiForbiddenException(ApiException ApiException) : MyApiException(ApiException);
-    public class MyApiServerErrorException(ApiException ApiException) : MyApiException(ApiException);
+    public class GithubApiException(ApiException ApiException) : Exception
+    {
+        private readonly ApiException ApiException = ApiException;
+    }
+
+    public class GithubApiForbiddenException(ApiException ApiException) : GithubApiException(ApiException);
+    public class GithubApiServerErrorException(ApiException ApiException) : GithubApiException(ApiException);
 }

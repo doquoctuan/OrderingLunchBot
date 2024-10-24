@@ -1,10 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using OrderLunch.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OrderLunch.UnitTests.Services
 {
@@ -13,7 +8,6 @@ namespace OrderLunch.UnitTests.Services
         private readonly IOrderService _orderService;
         public OrderServiceUnitTests(DependencySetupFixture fixture)
         {
-            // Arrange
             using var scope = fixture.ServiceProvider.CreateScope();
             _orderService = scope.ServiceProvider.GetService<IOrderService>();
         }
@@ -30,7 +24,9 @@ namespace OrderLunch.UnitTests.Services
         [Fact]
         public async Task OrderTicket_ShouldReturnTrue()
         {
-            await _orderService.OrderTicket();
+            (bool isSuccess, _)  = await _orderService.OrderTicket();
+
+            Assert.True(isSuccess);
         }
     }
 }

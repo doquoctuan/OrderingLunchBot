@@ -99,9 +99,9 @@ namespace OrderLunch.Services
                 var errorMessage = messageException switch
                 {
                     "Cannot find sheetId for the current month" => "Chưa tìm thấy sheet đặt phiếu ăn tháng này",
-                    "Cannot find sheetId for the prev month" => "Không tìm thấy sheet đặt phiếu ăn tháng trư",
+                    "Cannot find sheetId for the prev month" => "Không tìm thấy sheet đặt phiếu ăn tháng vừa rồi",
                     "Today, do not support registration for lunch" => "Hôm nay không hỗ trợ đặt phiếu ăn",
-                    "The user does not exists" => "Không tìm thấy người dùng này",
+                    "The user does not exists" => "Không tìm thấy người dùng này, vui lòng liên hệ tuandq16 (0367717714) để thêm mới",
                     _ => "Hệ thống bận, vui lòng thử lại"
                 };
 

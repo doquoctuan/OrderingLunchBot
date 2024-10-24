@@ -3,6 +3,8 @@
     public class Constants
     {
         public int EXPIRES_IN { get; set; } = 3500;
+
+        public static readonly string TELEGRAM_HOOK_NAME = "TelegramWebhook";
     }
 
     public class ErrorMessages
