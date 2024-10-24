@@ -6,8 +6,8 @@ namespace OrderLunch.Functions;
 
 public class HealthCheckFunction
 {
-    [Function(nameof(HealchCheck))]
-    public IActionResult HealchCheck(
+    [Function(nameof(HealthCheck))]
+    public IActionResult HealthCheck(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestData request)
     {
         return new OkObjectResult("OK");
