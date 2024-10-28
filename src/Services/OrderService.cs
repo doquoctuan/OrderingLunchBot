@@ -411,9 +411,10 @@ namespace OrderLunch.Services
                 return listRegister;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                _logger.LogError(message: "An error occurred while creating an unpaid image - Stacktrace:\n {StackTrace}", ex.StackTrace);
+                return [];
             }
         }
 
