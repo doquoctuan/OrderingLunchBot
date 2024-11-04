@@ -116,7 +116,7 @@ namespace OrderLunch.Services
 
                 if (!response.Any())
                 {
-                    if (message.Chat is not { Username: "cronjob" })
+                    if (message?.Chat is not { Username: "cronjob" })
                     {
                         await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Không có đồng chí nào đặt phiếu ăn hôm nay");
                     }
@@ -134,7 +134,7 @@ namespace OrderLunch.Services
 
                 await botClient.SendMediaGroupAsync(message.Chat.Id, media: albums);
 
-                if (message.Chat is { Username: "cronjob" })
+                if (message?.Chat is { Username: "cronjob" })
                 {
                     if (!string.IsNullOrEmpty(user16))
                     {
