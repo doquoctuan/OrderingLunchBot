@@ -118,7 +118,7 @@ namespace OrderLunch.Services
                 {
                     if (message?.Chat is not { Username: "cronjob" })
                     {
-                        await botClient.SendTextMessageAsync(message.Chat.Id, text: $"Không có đồng chí nào đặt phiếu ăn hôm nay");
+                        await botClient.SendTextMessageAsync(message?.Chat.Id, text: $"Không có đồng chí nào đặt phiếu ăn hôm nay");
                     }
                     return;
                 }
@@ -132,7 +132,7 @@ namespace OrderLunch.Services
                     };
                 });
 
-                await botClient.SendMediaGroupAsync(message.Chat.Id, media: albums);
+                await botClient.SendMediaGroupAsync(message?.Chat.Id, media: albums);
 
                 if (message?.Chat is { Username: "cronjob" })
                 {
