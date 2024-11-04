@@ -275,7 +275,7 @@ namespace OrderLunch.Services
         private (string, string) SeparateTelegramMessage(string telegramMessage)
         {
             string pattern = @"^/(\w+)\s*(.*)$";
-            Regex regex = new(pattern);
+            Regex regex = new(pattern, RegexOptions.None, TimeSpan.FromMilliseconds(1000));
             Match match = regex.Match(telegramMessage);
             if (match.Success)
             {
