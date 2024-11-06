@@ -3,10 +3,7 @@
     "OrderRice": {
       "commandName": "Project",
       "commandLineArgs": "--port 7202",
-      "launchBrowser": false,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Production"
-      }
+      "launchBrowser": false
     }
   }
 }
