@@ -1,3 +1,4 @@
+using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,6 +16,8 @@ var telegramToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", Env
 var githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN", EnvironmentVariableTarget.Process)
     ?? throw new ArgumentException("Can not get githubToken. Set GITHUB_TOKEN in environment setting");
 
+var appConfigConnectionStr = Environment.GetEnvironmentVariable("AppConfiguration", EnvironmentVariableTarget.Process);
+
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication(workerApplication =>
     {
@@ -31,6 +34,18 @@ var host = new HostBuilder()
         if (hostContext.HostingEnvironment.IsDevelopment())
         {
             config.AddUserSecrets<Program>();
+        } else
+        {
+            config.AddAzureAppConfiguration(options =>
+            {
+                options.Connect(appConfigConnectionStr);
+
+                // Configure Key Vault access
+                options.ConfigureKeyVault(keyVaultOptions =>
+                {
+                    keyVaultOptions.SetCredential(new DefaultAzureCredential());
+                });
+            });
         }
     })
     .ConfigureServices(serviceCollection =>
