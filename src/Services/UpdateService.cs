@@ -7,6 +7,7 @@ using OrderLunch.Exceptions;
 using OrderLunch.Helper;
 using OrderLunch.Interfaces;
 using OrderLunch.Persistence;
+using OrderLunch.Validations;
 using System.Data;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -198,6 +199,15 @@ namespace OrderLunch.Services
 
             static async Task Order(ITelegramBotClient botClient, IOrderService _orderService, Message message, string text, Users user, bool isAll = false, bool isOrder = true)
             {
+                var orderValidator = OrderValidation.CreateValidator(DateTime.Now);
+
+                var isValid = orderValidator(user.UserName);
+
+                if (!isValid)
+                {
+                    throw new OrderServiceException("Cannot order lunch today.");
+                }
+
                 string userName = string.IsNullOrEmpty(text) ? user.UserName : text;
 
                 StringBuilder messageText = new();
