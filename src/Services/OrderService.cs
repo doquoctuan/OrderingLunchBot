@@ -245,7 +245,6 @@ namespace OrderLunch.Services
 
             // Random user pick ticket for lunch
             Random random = new();
-            int randomIndexFloor16 = random.Next(0, floor16.Count);
             int randomIndexFloor19 = random.Next(0, floor19.Count);
 
             return new(listRegister, floor16.Count > 0 ? await GenerateMessageTakeTicket(floor16) : string.Empty, floor19.Count > 0 ? floor19[randomIndexFloor19] : string.Empty);

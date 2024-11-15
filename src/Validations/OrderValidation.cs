@@ -2,6 +2,8 @@
 
 internal class OrderValidation
 {
+    private OrderValidation() { }
+
     public static Func<string, bool> CreateValidator(DateTime createDate)
     {
         var baseValidation = CombineValidations(
@@ -13,5 +15,5 @@ internal class OrderValidation
     }
 
     private static Func<string, bool> CombineValidations(params Func<string, bool>[] validations) =>
-        order => validations.All(v => v(order));
+        order => Array.TrueForAll(validations, v => v(order));
 }
