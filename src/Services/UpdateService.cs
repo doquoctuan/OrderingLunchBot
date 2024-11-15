@@ -113,7 +113,7 @@ namespace OrderLunch.Services
 
             static async Task SendList(ITelegramBotClient botClient, IOrderService _orderService, Message message)
             {
-                (var response, string user16, string user19) = await _orderService.CreateOrderListImage(message?.From?.Username ?? "list");
+                (var response, string assignedMessage, string user19) = await _orderService.CreateOrderListImage(message?.From?.Username ?? "list");
 
                 if (!response.Any())
                 {
@@ -137,9 +137,9 @@ namespace OrderLunch.Services
 
                 if (message?.Chat is { Username: "cronjob" })
                 {
-                    if (!string.IsNullOrEmpty(user16))
+                    if (!string.IsNullOrEmpty(assignedMessage))
                     {
-                        await botClient.SendTextMessageAsync(message.Chat.Id, $"Đồng chí {user16} lấy phiếu cơm cho phòng Phát triển");
+                        await botClient.SendTextMessageAsync(message.Chat.Id, assignedMessage);
                     }
                 }
             }

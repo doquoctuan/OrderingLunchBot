@@ -10,5 +10,6 @@
         Task BlockOrderTicket();
         Task<bool> PaymentConfirmation(string userName);
         Task<(bool, int)> OrderTicket();
+        Task<string> GenerateMessageTakeTicket(List<string> users);
     }
 }

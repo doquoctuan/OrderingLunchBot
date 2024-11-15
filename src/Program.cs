@@ -2,11 +2,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderLunch;
+using OrderLunch.ApiClients;
 using OrderLunch.Helper;
 using OrderLunch.Interfaces;
 using OrderLunch.Middlewares;
 using OrderLunch.Persistence;
 using OrderLunch.Services;
+using Refit;
 using Telegram.Bot;
 
 var telegramToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.Process)
@@ -14,6 +16,8 @@ var telegramToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", Env
 
 var githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN", EnvironmentVariableTarget.Process)
     ?? throw new ArgumentException("Can not get githubToken. Set GITHUB_TOKEN in environment setting");
+
+var binanceKey = Environment.GetEnvironmentVariable("BinanceApiKey", EnvironmentVariableTarget.Process);
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication(workerApplication =>
@@ -65,6 +69,13 @@ var host = new HostBuilder()
         serviceCollection.AddScoped<UpdateService>();
         serviceCollection.AddScoped<GithubService>();
         serviceCollection.AddScoped<IOrderService, OrderService>();
+        serviceCollection
+            .AddRefitClient<IBinanceApiClient>()
+            .ConfigureHttpClient(c =>
+            {
+                c.BaseAddress = new Uri("https://binance43.p.rapidapi.com");
+                c.DefaultRequestHeaders.Add("x-rapidapi-key", binanceKey);
+            });
 
         serviceCollection.AddTransient<AuthTokenHandler>();
         serviceCollection.Decorate<IGoogleAuthService, CachedGoogleAuthService>();

@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OrderLunch.ApiClients;
 using OrderLunch.Helper;
 using OrderLunch.Interfaces;
 using OrderLunch.Persistence;
 using OrderLunch.Services;
+using Refit;
 using Telegram.Bot;
 
 namespace OrderLunch.UnitTests
@@ -62,6 +64,13 @@ namespace OrderLunch.UnitTests
             serviceCollection.AddScoped<UpdateService>();
             serviceCollection.AddScoped<GithubService>();
             serviceCollection.AddScoped<IOrderService, OrderService>();
+            serviceCollection
+                 .AddRefitClient<IBinanceApiClient>()
+                 .ConfigureHttpClient(c =>
+                 {
+                     c.BaseAddress = new Uri("https://binance43.p.rapidapi.com");
+                     c.DefaultRequestHeaders.Add("x-rapidapi-key", Configuration["BinanceApiKey"]);
+                 });
 
             serviceCollection.AddTransient<AuthTokenHandler>();
             serviceCollection.Decorate<IGoogleAuthService, CachedGoogleAuthService>();

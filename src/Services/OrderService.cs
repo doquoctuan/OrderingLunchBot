@@ -13,6 +13,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System.Text;
 using Color = SixLabors.ImageSharp.Color;
+using OrderLunch.ApiClients;
 
 namespace OrderLunch.Services
 {
@@ -22,6 +23,7 @@ namespace OrderLunch.Services
         private readonly GithubService _githubService;
         private readonly GoogleSheetContext _googleSheetContext;
         private readonly ILogger<OrderService> _logger;
+        private readonly IBinanceApiClient _binanceApiClient;
         private readonly string spreadSheetId;
         private readonly string centralSpreadSheetId;
         private readonly string BASE_IMAGE_URL;
@@ -34,7 +36,8 @@ namespace OrderLunch.Services
             IConfiguration configuration,
             GithubService githubService,
             GoogleSheetContext googleSheetContext,
-            ILogger<OrderService> logger)
+            ILogger<OrderService> logger,
+            IBinanceApiClient binanceApiClient)
         {
             _httpGoogleClient = httpClientFactory.CreateClient("google_sheet_client");
             _githubService = githubService;
@@ -44,6 +47,7 @@ namespace OrderLunch.Services
             BASE_IMAGE_URL = configuration["BASE_IMAGE"];
             BASE_IMAGE_UNPAID_URL = configuration["BASE_IMAGE_UNPAID"];
             _googleSheetContext = googleSheetContext;
+            _binanceApiClient = binanceApiClient;
         }
 
         private async Task<string> FindSheetId(DateTime dateTime, string spearchSheet = null)
@@ -178,9 +182,9 @@ namespace OrderLunch.Services
                 }
             }
 
-            HashSet<string> deptSet = new();
-            List<string> floor16 = new();
-            List<string> floor19 = new();
+            HashSet<string> deptSet = [];
+            List<string> floor16 = [];
+            List<string> floor19 = [];
 
             try
             {
@@ -192,7 +196,7 @@ namespace OrderLunch.Services
                 _logger.LogError("Exception: {Message}", ex.Message);
             }
 
-            Dictionary<string, string> registerLunchTodays = new();
+            Dictionary<string, string> registerLunchTodays = [];
             string statusPaid;
             // Get the list registration lunch today
             for (int i = 0; i < datas[indexCurrentDate].Count; i++)
@@ -212,7 +216,7 @@ namespace OrderLunch.Services
                 }
             }
 
-            List<(string, string)> listRegister = new();
+            List<(string, string)> listRegister = [];
             var registerLunchTodaysChunks = registerLunchTodays.Chunk(SIZE_LIST);
             int countImage = 1;
             var font = new Font(SystemFonts.Get("Arial"), FONT_SIZE, FontStyle.Regular);
@@ -244,7 +248,28 @@ namespace OrderLunch.Services
             int randomIndexFloor16 = random.Next(0, floor16.Count);
             int randomIndexFloor19 = random.Next(0, floor19.Count);
 
-            return new(listRegister, floor16.Count > 0 ? floor16[randomIndexFloor16] : string.Empty, floor19.Count > 0 ? floor19[randomIndexFloor19] : string.Empty);
+            return new(listRegister, floor16.Count > 0 ? await GenerateMessageTakeTicket(floor16) : string.Empty, floor19.Count > 0 ? floor19[randomIndexFloor19] : string.Empty);
+        }
+
+        public async Task<string> GenerateMessageTakeTicket(List<string> users)
+        {
+            static int ExtractRandomIndexFromPrice(decimal price, int userCount)
+            {
+                string[] parts = price.ToString("F").Split('.');
+                string combinedPart = string.Concat(parts[0], parts[1]);
+
+                int hash = combinedPart.GetHashCode();
+                return Math.Abs(hash) % userCount;
+            }
+
+            StringBuilder message = new("Giá Bitcoin hiện tại là: ");
+            var symbolPrice = await _binanceApiClient.GetPriceBySymbol();
+            message.Append(symbolPrice.Price.ToString("F"));
+            message.Append(" USDT");
+            int randomIndex = ExtractRandomIndexFromPrice(symbolPrice.Price, users.Count);
+            message.AppendLine($"\nKính mời đồng chí {users[randomIndex >= 0 ? randomIndex : 0]} ");
+            message.Append("lấy phiếu ăn ngày hôm nay.");
+            return message.ToString();
         }
 
         public async Task<(List<(string, string)>, string, string)> CreateOrderListImage(string folderName)

@@ -28,5 +28,16 @@ namespace OrderLunch.UnitTests.Services
 
             Assert.True(isSuccess);
         }
+
+        [Fact]
+        public async Task GenerateMessage_ShouldReturnValue()
+        {
+            List<string> users = ["user 01", "user 02", "user 03", "user 04", "user 05"];
+
+            var message = await _orderService.GenerateMessageTakeTicket(users);
+
+            Assert.NotNull(message);
+            Assert.NotEmpty(message);
+        }
     }
 }
