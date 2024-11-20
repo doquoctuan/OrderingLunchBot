@@ -1,0 +1,15 @@
+{
+  "AzureWebJobsStorage": "",
+  "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+  "TELEGRAM_BOT_TOKEN": "{{TELEGRAM_BOT_TOKEN}}",
+  "TELEGRAM_BOT_SECRET": "{{TELEGRAM_BOT_SECRET}}",
+  "GITHUB_TOKEN": "{{GITHUB_TOKEN}}",
+  "GITHUB_REPOSITORY_URL": "https://api.github.com",
+  "GITHUB_REPOSITORY_NAME": "{{GITHUB_REPOSITORY_NAME}}",
+  "BASE_IMAGE": "{{BASE_IMAGE_URL}}",
+  "SpreadSheetId": "{{SPREAD_SHEETID}}",
+  "Google_ClientId": "{{GOOGLE_CLIENT_ID}}",
+  "Google_ClientSecret": "{{GOOGLE_CLIENT_SECRET}}",
+  "Google_TokenEndpoint": "{{GOOGLE_TOKEN_ENDPOINT}}",
+  "Google_RefreshToken": "{{GOOGLE_REFRESHTOKEN}}"
+}

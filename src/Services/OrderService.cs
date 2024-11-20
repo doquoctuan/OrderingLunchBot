@@ -17,25 +17,38 @@ using OrderLunch.ApiClients;
 
 namespace OrderLunch.Services
 {
-    public class OrderService(
-        IHttpClientFactory httpClientFactory,
-        IConfiguration configuration,
-        GithubService githubService,
-        GoogleSheetContext googleSheetContext,
-        ILogger<OrderService> logger,
-        IBinanceApiClient binanceApiClient) : IOrderService
+    public class OrderService : IOrderService
     {
-        private readonly HttpClient _httpGoogleClient = httpClientFactory.CreateClient("google_sheet_client");
-        private readonly GithubService _githubService = githubService;
-        private readonly GoogleSheetContext _googleSheetContext = googleSheetContext;
-        private readonly ILogger<OrderService> _logger = logger;
-        private readonly IBinanceApiClient _binanceApiClient = binanceApiClient;
-        private readonly string spreadSheetId = configuration["SpreadSheetId"];
-        private readonly string centralSpreadSheetId = configuration["CentralSpreadSheetId"];
-        private readonly string BASE_IMAGE_URL = configuration["BASE_IMAGE"];
-        private readonly string BASE_IMAGE_UNPAID_URL = configuration["BASE_IMAGE_UNPAID"];
+        private readonly HttpClient _httpGoogleClient;
+        private readonly GithubService _githubService;
+        private readonly GoogleSheetContext _googleSheetContext;
+        private readonly ILogger<OrderService> _logger;
+        private readonly IBinanceApiClient _binanceApiClient;
+        private readonly string spreadSheetId;
+        private readonly string centralSpreadSheetId;
+        private readonly string BASE_IMAGE_URL;
+        private readonly string BASE_IMAGE_UNPAID_URL;
         private const int SIZE_LIST = 23;
         private const int FONT_SIZE = 40;
+
+        public OrderService(
+            IHttpClientFactory httpClientFactory,
+            IConfiguration configuration,
+            GithubService githubService,
+            GoogleSheetContext googleSheetContext,
+            ILogger<OrderService> logger,
+            IBinanceApiClient binanceApiClient)
+        {
+            _httpGoogleClient = httpClientFactory.CreateClient("google_sheet_client");
+            _githubService = githubService;
+            _logger = logger;
+            spreadSheetId = configuration["SpreadSheetId"];
+            centralSpreadSheetId = configuration["CentralSpreadSheetId"];
+            BASE_IMAGE_URL = configuration["BASE_IMAGE"];
+            BASE_IMAGE_UNPAID_URL = configuration["BASE_IMAGE_UNPAID"];
+            _googleSheetContext = googleSheetContext;
+            _binanceApiClient = binanceApiClient;
+        }
 
         private async Task<string> FindSheetId(DateTime dateTime, string spearchSheet = null)
         {
