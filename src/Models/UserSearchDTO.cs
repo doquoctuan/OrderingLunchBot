@@ -1,10 +1,10 @@
 ﻿namespace OrderLunch.Models
 {
     public record UserSearchDTO(
-        string staffCode,
-        string userName,
-        string staffName,
-        string email,
-        string avatar,
-        string phoneNumber);
+        string StaffCode,
+        string UserName,
+        string StaffName,
+        string Email,
+        string Avatar,
+        string PhoneNumber);
 }

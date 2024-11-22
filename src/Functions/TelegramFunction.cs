@@ -37,13 +37,10 @@ namespace OrderLunch.Functions
 
                 await _updateService.HandleMessageAsync(update);
             }
-            catch (ArgumentNullException)
-            {
-                _logger.LogError("Not Telegram calling webhook");
-            }
             catch (Exception e)
             {
                 _logger.LogError("Exception: {Message}\n {StackTrace}", e.Message, e.StackTrace);
+                await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, "Hệ thống bận, vui lòng thử lại sau");
             }
 
             return new OkObjectResult("OK");

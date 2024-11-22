@@ -135,9 +135,9 @@ namespace OrderLunch.Services
                     {
                         await botClient.SendPhotoAsync(
                         parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
-                        chatId: message.Chat.Id, 
-                        photo: InputFile.FromUri(user.avatar),
-                        caption: $"Họ tên: <b>{user.staffName}</b>\nUsername: <b>{user.staffCode}</b>\nDi động: <b>{user.phoneNumber}</b>\nEmail: <b>{user.email}</b>"
+                        chatId: message.Chat.Id,
+                        photo: InputFile.FromUri(user.Avatar),
+                        caption: $"Họ tên: <b>{user.StaffName}</b>\nUsername: <b>{user.StaffCode}</b>\nDi động: <b>{user.PhoneNumber}</b>\nEmail: <b>{user.Email}</b>"
                         );
                     }
                     catch (Exception)
@@ -146,7 +146,7 @@ namespace OrderLunch.Services
                         parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
                         chatId: message.Chat.Id,
                         photo: InputFile.FromUri("https://play-lh.googleusercontent.com/KDIgP3EBaj_aomyPqAFkt_gbHSoNWQPPLywutWXw1hoM-0lqGsQ2zHZW0GVuSpRVA0g"),
-                        caption: $"Họ tên: <b>{user.staffName}</b>\nUsername: <b>{user.staffCode}</b>\nDi động: <b>{user.phoneNumber}</b>\nEmail: <b>{user.email}</b>"
+                        caption: $"Họ tên: <b>{user.StaffName}</b>\nUsername: <b>{user.StaffCode}</b>\nDi động: <b>{user.PhoneNumber}</b>\nEmail: <b>{user.Email}</b>"
                         );
                     }
                 }
