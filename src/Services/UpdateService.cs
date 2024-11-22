@@ -76,7 +76,7 @@ namespace OrderLunch.Services
 
                 (bool isExist, Users user) = IsExists(message.Chat.Id, text);
 
-                if (!isExist && !message.Chat.Username.Equals("cronjob"))
+                if (!isExist && message.Chat is not null && message.Chat.Username is not null && !message.Chat.Username.Equals("cronjob"))
                 {
                     await _botClient.SendTextMessageAsync(message.Chat.Id, "Để bắt đầu, vui lòng cho biết bạn là ai\nSử dụng lệnh /set {username}");
                     return;
