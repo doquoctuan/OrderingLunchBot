@@ -55,7 +55,7 @@ namespace OrderLunch.Services
             ";
 
             using var connection = dapperContext.CreateConnection();
-            var parameters = new { keyword, limit_number = 10 };
+            var parameters = new { keyword, limit_number = 1 };
             var result = await connection.QueryAsync<UserSearchDTO>(query, parameters);
             return result.ToList();
         }

@@ -113,8 +113,6 @@ namespace OrderLunch.Services
                 await _botClient.SendTextMessageAsync(message.Chat.Id, errorMessage);
             }
 
-            #region LocalFunction
-
             static async Task SearchHandler(ITelegramBotClient botClient, IUserService userService, Message message, string keyword)
             {
                 if (string.IsNullOrEmpty(keyword))
@@ -131,15 +129,27 @@ namespace OrderLunch.Services
                     return;
                 }
 
-                await botClient.SendMediaGroupAsync(message.Chat.Id, media: users.Select(x =>
+                foreach (var user in users)
                 {
-                    return new InputMediaPhoto(InputFile.FromUri(x.avatar))
+                    try
                     {
-                        Caption = $"Tên đồng chí: *{x.staffName}*\n" +
-                                  $"Email: _{x.email}_\n" +
-                                  $"Số điện thoại: `{x.phoneNumber}`"
-                    };
-                }));
+                        await botClient.SendPhotoAsync(
+                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                        chatId: message.Chat.Id, 
+                        photo: InputFile.FromUri(user.avatar),
+                        caption: $"Họ tên: <b>{user.staffName}</b>\nUsername: <b>{user.staffCode}</b>\nDi động: <b>{user.phoneNumber}</b>\nEmail: <b>{user.email}</b>"
+                        );
+                    }
+                    catch (Exception)
+                    {
+                        await botClient.SendPhotoAsync(
+                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                        chatId: message.Chat.Id,
+                        photo: InputFile.FromUri("https://play-lh.googleusercontent.com/KDIgP3EBaj_aomyPqAFkt_gbHSoNWQPPLywutWXw1hoM-0lqGsQ2zHZW0GVuSpRVA0g"),
+                        caption: $"Họ tên: <b>{user.staffName}</b>\nUsername: <b>{user.staffCode}</b>\nDi động: <b>{user.phoneNumber}</b>\nEmail: <b>{user.email}</b>"
+                        );
+                    }
+                }
             }
 
             static async Task SendList(ITelegramBotClient botClient, IOrderService _orderService, Message message)
@@ -283,9 +293,6 @@ namespace OrderLunch.Services
                 string messageText = isSuccess ? $"Đã xác nhận thanh toán tiền cơm tháng {DateTime.Now.AddMonths(-1).Month} cho đồng chí {user?.FullName}" : "Chưa thể xác nhận thanh toán vào lúc này, vui lòng thử lại.";
                 await botClient.SendTextMessageAsync(chatId, text: messageText);
             }
-
-            #endregion
-
         }
 
         private Task UnknownHandlerAsync(Update update)
@@ -322,7 +329,7 @@ namespace OrderLunch.Services
             {
                 return new(match.Groups[1].Value, match.Groups[2].Value);
             }
-            return new(string.Empty, telegramMessage);
+            return new(string.Empty, telegramMessage.Trim());
         }
 
     }
