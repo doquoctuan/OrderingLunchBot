@@ -10,6 +10,7 @@ using OrderLunch.Persistence;
 using OrderLunch.Services;
 using Refit;
 using Telegram.Bot;
+using UTC2_Tool.Context;
 
 var telegramToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.Process)
     ?? throw new ArgumentException("Can not get telegram token. Set TELEGRAM_BOT_TOKEN in environment setting");
@@ -62,12 +63,14 @@ var host = new HostBuilder()
 
         // Add Persistence
         serviceCollection.AddSingleton(typeof(GoogleSheetsHelper));
+        serviceCollection.AddSingleton<DapperContext>();
         serviceCollection.AddScoped(typeof(GoogleSheetContext));
 
         // Add business-logic service
         serviceCollection.AddScoped<IGoogleAuthService, GoogleAuthService>();
         serviceCollection.AddScoped<UpdateService>();
         serviceCollection.AddScoped<GithubService>();
+        serviceCollection.AddScoped<IUserService, UserService>();
         serviceCollection.AddScoped<IOrderService, OrderService>();
         serviceCollection
             .AddRefitClient<IBinanceApiClient>()

@@ -24,6 +24,7 @@ namespace OrderLunch.Services
         private readonly ITelegramBotClient _botClient;
         private readonly ILogger<UpdateService> _logger;
         private readonly IOrderService _orderService;
+        private readonly IUserService _userService;
         private readonly SpreadsheetsResource.ValuesResource _googleSheetValues;
         private readonly GoogleSheetContext _googleSheetContext;
         private readonly string urlPaymentInfo;
@@ -34,11 +35,13 @@ namespace OrderLunch.Services
             IOrderService orderService,
             GoogleSheetsHelper googleSheetsHelper,
             GoogleSheetContext googleSheetContext,
+            IUserService userService,
             IConfiguration configuration)
         {
             _botClient = botClient;
             _logger = logger;
             _orderService = orderService;
+            _userService = userService;
             _googleSheetValues = googleSheetsHelper.Service.Spreadsheets.Values;
             _googleSheetContext = googleSheetContext;
             SPREADSHEET_ID = configuration["GoogleSheetDatasource"];
@@ -81,6 +84,7 @@ namespace OrderLunch.Services
 
                 var action = command switch
                 {
+                    "search" or "s" or "s@khaykhay_bot" or "search@khaykhay_bot" => SearchHandler(_botClient, _userService, message, text),
                     "list" or "list@khaykhay_bot" => SendList(_botClient, _orderService, message),
                     "debtor" or "debtor@khaykhay_bot" => SendDebtor(_botClient, _orderService, message),
                     "menu" or "menu@khaykhay_bot" => SendMenu(_botClient, _orderService, message),
@@ -110,6 +114,33 @@ namespace OrderLunch.Services
             }
 
             #region LocalFunction
+
+            static async Task SearchHandler(ITelegramBotClient botClient, IUserService userService, Message message, string keyword)
+            {
+                if (string.IsNullOrEmpty(keyword))
+                {
+                    await botClient.SendTextMessageAsync(message.Chat.Id, text: "Vui lòng nhập từ khóa để tìm kiếm");
+                    return;
+                }
+
+                var users = await userService.Search(keyword);
+
+                if (users.Count == 0)
+                {
+                    await botClient.SendTextMessageAsync(message.Chat.Id, text: "Không tìm thấy thông tin người dùng");
+                    return;
+                }
+
+                await botClient.SendMediaGroupAsync(message.Chat.Id, media: users.Select(x =>
+                {
+                    return new InputMediaPhoto(InputFile.FromUri(x.avatar))
+                    {
+                        Caption = $"Tên đồng chí: *{x.staffName}*\n" +
+                                  $"Email: _{x.email}_\n" +
+                                  $"Số điện thoại: `{x.phoneNumber}`"
+                    };
+                }));
+            }
 
             static async Task SendList(ITelegramBotClient botClient, IOrderService _orderService, Message message)
             {
