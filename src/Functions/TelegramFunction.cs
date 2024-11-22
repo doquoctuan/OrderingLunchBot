@@ -25,10 +25,11 @@ namespace OrderLunch.Functions
         [Function(nameof(TelegramWebhook))]
         public async Task<IActionResult> TelegramWebhook([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData request)
         {
+            Update update = null;
             try
             {
                 var body = await request.ReadAsStringAsync() ?? throw new ArgumentNullException(nameof(request));
-                var update = JsonConvert.DeserializeObject<Update>(body);
+                update = JsonConvert.DeserializeObject<Update>(body);
                 if (update is null)
                 {
                     _logger.LogError("Unable to deserialize Update object.");
@@ -40,7 +41,11 @@ namespace OrderLunch.Functions
             catch (Exception e)
             {
                 _logger.LogError("Exception: {Message}\n {StackTrace}", e.Message, e.StackTrace);
-                await _botClient.SendTextMessageAsync(chatId: DEVELOPMENT_DEPARMENT_ID, "Hệ thống bận, vui lòng thử lại sau");
+
+                if (update is not null)
+                {
+                    await _botClient.SendTextMessageAsync(chatId: update.Message.Chat.Id, "Hệ thống bận, vui lòng thử lại sau");
+                }
             }
 
             return new OkObjectResult("OK");
