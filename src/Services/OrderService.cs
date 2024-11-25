@@ -267,7 +267,7 @@ namespace OrderLunch.Services
             message.Append(symbolPrice.Price.ToString("F"));
             message.Append(" USDT");
             int randomIndex = GetRandomIndex(users.Count);
-            message.AppendLine($"\nKính mời đồng chí {users[randomIndex >= 0 ? randomIndex : 0]} ");
+            message.AppendLine($"\nKính mời đồng chí <b>{users[randomIndex >= 0 ? randomIndex : 0]}</b> ");
             message.Append("lấy phiếu ăn ngày hôm nay.");
             return message.ToString();
         }

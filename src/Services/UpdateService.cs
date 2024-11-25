@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
 
 namespace OrderLunch.Services
@@ -180,7 +181,7 @@ namespace OrderLunch.Services
                 {
                     if (!string.IsNullOrEmpty(assignedMessage))
                     {
-                        await botClient.SendTextMessageAsync(message.Chat.Id, assignedMessage);
+                        await botClient.SendTextMessageAsync(message.Chat.Id, assignedMessage, parseMode: ParseMode.Html);
                     }
                 }
             }
