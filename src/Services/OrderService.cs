@@ -14,6 +14,7 @@ using SixLabors.ImageSharp.Processing;
 using System.Text;
 using Color = SixLabors.ImageSharp.Color;
 using OrderLunch.ApiClients;
+using System.Security.Cryptography;
 
 namespace OrderLunch.Services
 {
@@ -252,20 +253,20 @@ namespace OrderLunch.Services
 
         public async Task<string> GenerateMessageTakeTicket(List<string> users)
         {
-            static int ExtractRandomIndexFromPrice(decimal price, int userCount)
+            static int GetRandomIndex(int userCount)
             {
-                string[] parts = price.ToString("F").Split('.');
-                string combinedPart = string.Concat(parts[0], parts[1]);
-
-                int hash = combinedPart.GetHashCode();
-                return Math.Abs(hash) % userCount;
+                using var rng = RandomNumberGenerator.Create();
+                byte[] randomNumber = new byte[4];
+                rng.GetBytes(randomNumber);
+                int value = BitConverter.ToInt32(randomNumber, 0);
+                return Math.Abs(value) % userCount;
             }
 
             StringBuilder message = new("Giá Bitcoin hiện tại là: ");
             var symbolPrice = await _binanceApiClient.GetPriceBySymbol();
             message.Append(symbolPrice.Price.ToString("F"));
             message.Append(" USDT");
-            int randomIndex = ExtractRandomIndexFromPrice(symbolPrice.Price, users.Count);
+            int randomIndex = GetRandomIndex(users.Count);
             message.AppendLine($"\nKính mời đồng chí {users[randomIndex >= 0 ? randomIndex : 0]} ");
             message.Append("lấy phiếu ăn ngày hôm nay.");
             return message.ToString();
