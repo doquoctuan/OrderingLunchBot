@@ -68,14 +68,33 @@
 			}
 		},
 		{
-			"type": "func",
-			"dependsOn": "build (functions)",
-			"options": {
-				"cwd": "${workspaceFolder}/src/bin/Debug/net8.0"
-			},
-			"command": "host start",
+			"label": "start functions host",
+			"command": "func",
+			"args": [
+				"start"
+			],
+			"type": "shell",
 			"isBackground": true,
-			"problemMatcher": "$func-dotnet-watch"
+			"problemMatcher": [
+				{
+					"pattern": [
+						{
+							"regexp": ".",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					],
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": ".",
+						"endsPattern": ".*(Job host started|Host lock lease acquired).*"
+					}
+				}
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/src"
+			}
 		}
 	]
 }
