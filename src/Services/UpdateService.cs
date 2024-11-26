@@ -302,7 +302,8 @@ namespace OrderLunch.Services
             async Task GeneratePaymentLink(ITelegramBotClient botClient, long chatId)
             {
                 decimal amount = 570000m;
-                var paymentLink = await _paymentService.GeneratePaymentLinkAsync(amount);
+                string addInfo = "tien com thang 11";
+                var paymentLink = await _paymentService.GeneratePaymentLinkAsync(amount, addInfo);
                 await botClient.SendPhotoAsync(chatId, photo: InputFile.FromUri(urlPaymentInfo), caption: paymentLink);
             }
         }

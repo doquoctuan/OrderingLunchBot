@@ -15,8 +15,8 @@ public class PaymentService : IPaymentService
         _templateName = Environment.GetEnvironmentVariable("TEMPLATE_NAME") ?? "compact";
     }
 
-    public Task<string> GeneratePaymentLinkAsync(decimal amount)
+    public Task<string> GeneratePaymentLinkAsync(decimal amount, string additionalData)
     {
-        return Task.FromResult($"https://img.vietqr.io/image/{_binCode}-{_accountNumber}-{_templateName}.png?amount={amount:F0}");
+        return Task.FromResult($"https://img.vietqr.io/image/{_binCode}-{_accountNumber}-{_templateName}.png?amount={amount:F0}&addInfo={additionalData}");
     }
 }
