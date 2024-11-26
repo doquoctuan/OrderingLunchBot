@@ -303,7 +303,7 @@ namespace OrderLunch.Services
             {
                 decimal amount = 570000m;
                 var paymentLink = await _paymentService.GeneratePaymentLinkAsync(amount);
-                await botClient.SendTextMessageAsync(chatId, text: paymentLink);
+                await botClient.SendPhotoAsync(chatId, photo: InputFile.FromUri(urlPaymentInfo), caption: paymentLink);
             }
         }
 
