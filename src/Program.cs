@@ -72,6 +72,7 @@ var host = new HostBuilder()
         serviceCollection.AddScoped<GithubService>();
         serviceCollection.AddScoped<IUserService, UserService>();
         serviceCollection.AddScoped<IOrderService, OrderService>();
+        serviceCollection.AddScoped<IPaymentService, PaymentService>();
         serviceCollection
             .AddRefitClient<IBinanceApiClient>()
             .ConfigureHttpClient(c =>

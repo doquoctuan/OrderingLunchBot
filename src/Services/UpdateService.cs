@@ -26,6 +26,7 @@ namespace OrderLunch.Services
         private readonly ILogger<UpdateService> _logger;
         private readonly IOrderService _orderService;
         private readonly IUserService _userService;
+        private readonly IPaymentService _paymentService;
         private readonly SpreadsheetsResource.ValuesResource _googleSheetValues;
         private readonly GoogleSheetContext _googleSheetContext;
         private readonly string urlPaymentInfo;
@@ -37,12 +38,14 @@ namespace OrderLunch.Services
             GoogleSheetsHelper googleSheetsHelper,
             GoogleSheetContext googleSheetContext,
             IUserService userService,
+            IPaymentService paymentService,
             IConfiguration configuration)
         {
             _botClient = botClient;
             _logger = logger;
             _orderService = orderService;
             _userService = userService;
+            _paymentService = paymentService;
             _googleSheetValues = googleSheetsHelper.Service.Spreadsheets.Values;
             _googleSheetContext = googleSheetContext;
             SPREADSHEET_ID = configuration["GoogleSheetDatasource"];
@@ -95,6 +98,7 @@ namespace OrderLunch.Services
                     "unorderall" or "unorderall@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: false, isAll: true),
                     "set" or "set@khaykhay_bot" => SetTelegramId(_botClient, _googleSheetValues, user, message.Chat.Id),
                     "confirm" or "confirm@khaykhay_bot" => PaymentConfirmation(_botClient, user, message.Chat.Id),
+                    "pay" or "pay@khaykhay_bot" => GeneratePaymentLink(_botClient, message.Chat.Id),
                     _ => Task.CompletedTask
                 };
 
@@ -293,6 +297,13 @@ namespace OrderLunch.Services
                 bool isSuccess = await _orderService.PaymentConfirmation(user?.FullName);
                 string messageText = isSuccess ? $"Đã xác nhận thanh toán tiền cơm tháng {DateTime.Now.AddMonths(-1).Month} cho đồng chí {user?.FullName}" : "Chưa thể xác nhận thanh toán vào lúc này, vui lòng thử lại.";
                 await botClient.SendTextMessageAsync(chatId, text: messageText);
+            }
+
+            async Task GeneratePaymentLink(ITelegramBotClient botClient, long chatId)
+            {
+                decimal amount = 570000m;
+                var paymentLink = await _paymentService.GeneratePaymentLinkAsync(amount);
+                await botClient.SendTextMessageAsync(chatId, text: paymentLink);
             }
         }
 
