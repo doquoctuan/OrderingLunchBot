@@ -304,7 +304,7 @@ namespace OrderLunch.Services
                 decimal amount = 570000m;
                 string addInfo = "tien com thang 11";
                 var paymentLink = await _paymentService.GeneratePaymentLinkAsync(amount, addInfo);
-                await botClient.SendPhotoAsync(chatId, photo: InputFile.FromUri(urlPaymentInfo), caption: paymentLink);
+                await botClient.SendPhotoAsync(chatId, photo: InputFile.FromUri(paymentLink));
             }
         }
 
