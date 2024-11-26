@@ -10,6 +10,23 @@ The chatbot is designed to facilitate the management and ordering of meals by ut
 - Automated Tasks: The bot includes automated tasks for sending daily menus, reminders for unpaid orders, and blocking order tickets after a certain time.
 - Unit Testing: The project includes unit tests to ensure the functionality of the order services.
 
+## Tech Stack
+
+- **Programming Language**: C#
+- **Framework**: .NET 8.0
+- **Cloud Platform**: Azure Functions
+- **Database**: Google Sheets (via Google Sheets API)
+- **Messaging Platform**: Telegram Bot API
+- **Dependency Injection**: Microsoft.Extensions.DependencyInjection
+- **HTTP Client**: Refit
+- **Logging**: Microsoft.Extensions.Logging
+- **Image Processing**: SixLabors.ImageSharp
+- **Unit Testing**: xUnit
+- **CI/CD**: GitHub Actions
+- **Configuration Management**: Azure App Configuration, local.settings.json
+- **Version Control**: Git
+- **Package Management**: NuGet, npm (for dev dependencies like commitlint)
+- **Infrastructure as Code**: Terraform
 
 ## SonarCloud
 
