@@ -303,13 +303,13 @@ namespace OrderLunch.Services
             async Task GeneratePaymentLink(ITelegramBotClient botClient, User user, long chatId)
             {
                 var totalLunchOrder = await _orderService.GetTotalLunchOrderByUser(user?.FullName);
-                var paymentLink = await _paymentService.GeneratePaymentLinkAsync(totalLunchOrder, user.UserName);
+                var paymentLink = await _paymentService.GeneratePaymentLinkAsync(totalLunchOrder, user?.UserName);
                 StringBuilder paymentInfoMessage = new();
                 paymentInfoMessage.Append($"<b>Hoá đơn tiền cơm tháng {DateTime.Now.Month - 1}</b>");
                 paymentInfoMessage.Append($"\nHọ tên: <b>{user?.FullName}</b>");
                 paymentInfoMessage.Append($"\nSố lượng phiếu: <b>{totalLunchOrder}</b>");
                 paymentInfoMessage.Append($"\nTổng tiền: <b>{totalLunchOrder * 30.000}</b>");
-                paymentInfoMessage.Append($"\nVui lòng quét mã QR để thanh toán</b>");
+                paymentInfoMessage.Append($"\nVui lòng quét mã QR để thanh toán");
                 await botClient.SendPhotoAsync(
                     chatId: chatId, 
                     photo: InputFile.FromUri(paymentLink), 
