@@ -9,6 +9,7 @@ using OrderLunch.Interfaces;
 using OrderLunch.Persistence;
 using OrderLunch.Validations;
 using System.Data;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using Telegram.Bot;
@@ -308,7 +309,7 @@ namespace OrderLunch.Services
                 paymentInfoMessage.Append($"<b>Hoá đơn tiền cơm tháng {DateTime.Now.Month - 1}</b>");
                 paymentInfoMessage.Append($"\nHọ tên: <b>{user?.FullName}</b>");
                 paymentInfoMessage.Append($"\nSố lượng phiếu: <b>{totalLunchOrder}</b>");
-                paymentInfoMessage.Append($"\nTổng tiền: <b>{totalLunchOrder * 30.000}</b>");
+                paymentInfoMessage.Append($"\nTổng tiền: <b>{(totalLunchOrder * 30000).ToString("C", new CultureInfo("vi-VN"))}</b>");
                 paymentInfoMessage.Append($"\nVui lòng quét mã QR để thanh toán");
                 await botClient.SendPhotoAsync(
                     chatId: chatId, 
