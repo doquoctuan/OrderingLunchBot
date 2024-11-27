@@ -11,5 +11,6 @@
         Task<bool> PaymentConfirmation(string userName);
         Task<(bool, int)> OrderTicket();
         Task<string> GenerateMessageTakeTicket(List<string> users);
+        Task<int> GetTotalLunchOrderByUser(string userName);
     }
 }

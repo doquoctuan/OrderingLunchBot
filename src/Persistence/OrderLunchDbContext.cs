@@ -7,12 +7,12 @@ namespace OrderLunch.Persistence
     {
         public OrderLunchDbContext(DbContextOptions options) : base(options) { }
 
-        public DbSet<Users> Users { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .Entity<Users>()
+                .Entity<User>()
                 .ToTable("Users")
                 .HasKey(x => x.UserName);
 

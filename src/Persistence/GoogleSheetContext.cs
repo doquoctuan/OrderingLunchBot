@@ -22,7 +22,7 @@ namespace OrderLunch.Persistence
             _googleSheetsHelper = googleSheetsHelper;
         }
 
-        public List<Users> Users { get; set; }
+        public List<User> Users { get; set; }
 
         public void ProtectedRange(string spreadSheetId, int sheetId, int StartColumnIndex)
         {

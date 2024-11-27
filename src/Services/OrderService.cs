@@ -568,5 +568,42 @@ namespace OrderLunch.Services
             indexCurrentDate++;
             return (await WriteSpreadSheet(currentDate, indexCurrentDate, indexCurrentDate + 1, indexDevDepartment, sheetId, val: totalTicket, isAllowWeeken: true, spearchSheet: centralSpreadSheetId), totalTicket);
         }
+
+        /// <summary>
+        /// Retrieves the total number of lunch orders placed by a specific user in the previous month.
+        /// </summary>
+        /// <param name="fullName">The full name of the user.</param>
+        /// <returns>The total number of lunch orders placed by the user.</returns>
+        /// <exception cref="OrderServiceException">
+        /// Thrown when the previous month's sheet cannot be found, the user does not exist, or the data format for total lunch orders is invalid.
+        /// </exception>
+        public async Task<int> GetTotalLunchOrderByUser(string fullName)
+        {
+            var prevSheetId = await FindSheetId(DateTime.Now.AddMonths(-1));
+            if (string.IsNullOrEmpty(prevSheetId))
+            {
+                throw new OrderServiceException(ErrorMessages.CANNOT_FIND_PREV_SHEET);
+            }
+
+            var prevSpreadSheetData = await GetSpreadSheetData(prevSheetId);
+
+            // Find total lunch order by user
+            for (int i = 0; i < prevSpreadSheetData[0].Count; i++)
+            {
+                if (string.Equals(prevSpreadSheetData[0][i], fullName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (int.TryParse(prevSpreadSheetData[2][i], out int totalLunchOrders))
+                    {
+                        return totalLunchOrders;
+                    }
+                    else
+                    {
+                        throw new OrderServiceException("Invalid data format for total lunch orders.");
+                    }
+                }
+            }
+
+            throw new OrderServiceException(ErrorMessages.USER_DOES_NOT_EXIST);
+        }
     }
 }

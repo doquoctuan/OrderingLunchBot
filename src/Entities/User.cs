@@ -1,6 +1,6 @@
 ﻿namespace OrderLunch.Entities
 {
-    public class Users : BaseEntity<Guid>
+    public class User : BaseEntity<Guid>
     {
         public int RowNum { get; set; }
         public string UserName { get; set; }

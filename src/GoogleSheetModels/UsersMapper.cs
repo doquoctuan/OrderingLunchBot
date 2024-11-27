@@ -5,9 +5,9 @@ namespace OrderLunch.GoogleSheetModels
 {
     public static class UsersMapper
     {
-        public static List<Users> MapFromRangeData(IList<IList<object>> values)
+        public static List<User> MapFromRangeData(IList<IList<object>> values)
         {
-            var items = new List<Users>();
+            var items = new List<User>();
 
             int i = 1;
             foreach (var value in values)
@@ -18,7 +18,7 @@ namespace OrderLunch.GoogleSheetModels
                     continue;
                 }
 
-                Users item = new()
+                User item = new()
                 {
                     RowNum = i,
                     UserName = value[0].ToString(),
@@ -39,7 +39,7 @@ namespace OrderLunch.GoogleSheetModels
             return items;
         }
 
-        public static IList<IList<object>> MapToRangeData(Users item)
+        public static IList<IList<object>> MapToRangeData(User item)
         {
             var objectList = new List<object>() { item.UserName, item.Email, item.FullName, item.GetDayIn(), item.GetBirthday(), item.PhoneNumber, item.GetIsBlacklist(), item.Department, item.Floor, item.TelegramId };
             var rangeData = new List<IList<object>> { objectList };

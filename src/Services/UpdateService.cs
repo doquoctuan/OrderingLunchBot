@@ -15,6 +15,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
+using User = OrderLunch.Entities.User;
 
 namespace OrderLunch.Services
 {
@@ -78,7 +79,7 @@ namespace OrderLunch.Services
 
                 (string command, string text) = SeparateTelegramMessage(messageText);
 
-                (bool isExist, Users user) = IsExists(message.Chat.Id, text);
+                (bool isExist, Entities.User user) = IsExists(message.Chat.Id, text);
 
                 if (!isExist && message.Chat is not null && message.Chat.Username is not null && !message.Chat.Username.Equals("cronjob"))
                 {
@@ -98,7 +99,7 @@ namespace OrderLunch.Services
                     "unorderall" or "unorderall@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: false, isAll: true),
                     "set" or "set@khaykhay_bot" => SetTelegramId(_botClient, _googleSheetValues, user, message.Chat.Id),
                     "confirm" or "confirm@khaykhay_bot" => PaymentConfirmation(_botClient, user, message.Chat.Id),
-                    "pay" or "pay@khaykhay_bot" => GeneratePaymentLink(_botClient, message.Chat.Id),
+                    "pay" or "pay@khaykhay_bot" => GeneratePaymentLink(_botClient, user, message.Chat.Id),
                     _ => Task.CompletedTask
                 };
 
@@ -243,7 +244,7 @@ namespace OrderLunch.Services
                 await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: messageText.ToString());
             }
 
-            static async Task Order(ITelegramBotClient botClient, IOrderService _orderService, Message message, string text, Users user, bool isAll = false, bool isOrder = true)
+            static async Task Order(ITelegramBotClient botClient, IOrderService _orderService, Message message, string text, Entities.User user, bool isAll = false, bool isOrder = true)
             {
                 var orderValidator = OrderValidation.CreateValidator(DateTime.Now);
 
@@ -278,7 +279,7 @@ namespace OrderLunch.Services
                 await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: messageText.ToString());
             }
 
-            async Task SetTelegramId(ITelegramBotClient botClient, SpreadsheetsResource.ValuesResource _googleSheetValues, Users user, long chatId)
+            async Task SetTelegramId(ITelegramBotClient botClient, SpreadsheetsResource.ValuesResource _googleSheetValues, Entities.User user, long chatId)
             {
                 var range = $"{SHEET_NAME}!J{user.RowNum}:J{user.RowNum}";
                 var valueRange = new ValueRange
@@ -292,19 +293,29 @@ namespace OrderLunch.Services
                 await botClient.SendTextMessageAsync(chatId, text: $"Cập nhật thông tin thành công cho đồng chí {user.FullName}");
             }
 
-            async Task PaymentConfirmation(ITelegramBotClient botClient, Users user, long chatId)
+            async Task PaymentConfirmation(ITelegramBotClient botClient, User user, long chatId)
             {
                 bool isSuccess = await _orderService.PaymentConfirmation(user?.FullName);
                 string messageText = isSuccess ? $"Đã xác nhận thanh toán tiền cơm tháng {DateTime.Now.AddMonths(-1).Month} cho đồng chí {user?.FullName}" : "Chưa thể xác nhận thanh toán vào lúc này, vui lòng thử lại.";
                 await botClient.SendTextMessageAsync(chatId, text: messageText);
             }
 
-            async Task GeneratePaymentLink(ITelegramBotClient botClient, long chatId)
+            async Task GeneratePaymentLink(ITelegramBotClient botClient, User user, long chatId)
             {
-                decimal amount = 570000m;
-                string addInfo = "tien com thang 11";
-                var paymentLink = await _paymentService.GeneratePaymentLinkAsync(amount, addInfo);
-                await botClient.SendPhotoAsync(chatId, photo: InputFile.FromUri(paymentLink));
+                var totalLunchOrder = await _orderService.GetTotalLunchOrderByUser(user?.FullName);
+                var paymentLink = await _paymentService.GeneratePaymentLinkAsync(totalLunchOrder, user.UserName);
+                StringBuilder paymentInfoMessage = new();
+                paymentInfoMessage.Append($"<b>Hoá đơn tiền cơm tháng {DateTime.Now.Month - 1}</b>");
+                paymentInfoMessage.AppendLine($"Họ tên: <b>{user?.FullName}</b>");
+                paymentInfoMessage.AppendLine($"Số lượng phiếu: <b>{totalLunchOrder}</b>");
+                paymentInfoMessage.AppendLine($"Tổng tiền: <b>{totalLunchOrder * 30.000}</b>");
+                paymentInfoMessage.AppendLine($"Vui lòng quét mã QR để thanh toán</b>");
+                await botClient.SendPhotoAsync(
+                    chatId: chatId, 
+                    photo: InputFile.FromUri(paymentLink), 
+                    parseMode: ParseMode.Html, 
+                    caption: paymentInfoMessage.ToString()
+                );
             }
         }
 
@@ -314,7 +325,7 @@ namespace OrderLunch.Services
             return Task.CompletedTask;
         }
 
-        private (bool, Users) IsExists(long telegramId, string messageText)
+        private (bool, User) IsExists(long telegramId, string messageText)
         {
             var users = _googleSheetContext
                             .Users

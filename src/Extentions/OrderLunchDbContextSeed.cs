@@ -30,10 +30,10 @@ namespace OrderLunch.Extentions
             foreach (var value in mapperValue)
             {
                 isAdd = false;
-                Users userModel = users.Find(x => x.UserName == value.UserName);
+                User userModel = users.Find(x => x.UserName == value.UserName);
                 if (userModel is null)
                 {
-                    userModel = new Users
+                    userModel = new User
                     {
                         UserName = value.UserName,
                         Department = value.Department
