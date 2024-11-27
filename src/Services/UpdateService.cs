@@ -80,7 +80,7 @@ namespace OrderLunch.Services
 
                 (string command, string text) = SeparateTelegramMessage(messageText);
 
-                (bool isExist, Entities.User user) = IsExists(message.Chat.Id, text);
+                (bool isExist, User user) = IsExists(message.Chat.Id, text);
 
                 if (!isExist && message.Chat is not null && message.Chat.Username is not null && !message.Chat.Username.Equals("cronjob"))
                 {
@@ -345,7 +345,7 @@ namespace OrderLunch.Services
             return new(true, users[0]);
         }
 
-        private (string, string) SeparateTelegramMessage(string telegramMessage)
+        private static (string, string) SeparateTelegramMessage(string telegramMessage)
         {
             string pattern = @"^/(\w+)\s*(.*)$";
             Regex regex = new(pattern, RegexOptions.None, TimeSpan.FromMilliseconds(1000));
