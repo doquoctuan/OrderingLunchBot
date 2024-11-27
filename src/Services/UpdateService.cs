@@ -306,10 +306,10 @@ namespace OrderLunch.Services
                 var paymentLink = await _paymentService.GeneratePaymentLinkAsync(totalLunchOrder, user.UserName);
                 StringBuilder paymentInfoMessage = new();
                 paymentInfoMessage.Append($"<b>Hoá đơn tiền cơm tháng {DateTime.Now.Month - 1}</b>");
-                paymentInfoMessage.AppendLine($"Họ tên: <b>{user?.FullName}</b>");
-                paymentInfoMessage.AppendLine($"Số lượng phiếu: <b>{totalLunchOrder}</b>");
-                paymentInfoMessage.AppendLine($"Tổng tiền: <b>{totalLunchOrder * 30.000}</b>");
-                paymentInfoMessage.AppendLine($"Vui lòng quét mã QR để thanh toán</b>");
+                paymentInfoMessage.Append($"\nHọ tên: <b>{user?.FullName}</b>");
+                paymentInfoMessage.Append($"\nSố lượng phiếu: <b>{totalLunchOrder}</b>");
+                paymentInfoMessage.Append($"\nTổng tiền: <b>{totalLunchOrder * 30.000}</b>");
+                paymentInfoMessage.Append($"\nVui lòng quét mã QR để thanh toán</b>");
                 await botClient.SendPhotoAsync(
                     chatId: chatId, 
                     photo: InputFile.FromUri(paymentLink), 
