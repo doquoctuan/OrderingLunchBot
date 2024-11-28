@@ -31,7 +31,7 @@ public class PaymentService : IPaymentService
     /// <returns>A task that represents the asynchronous operation. The task result contains the generated payment link as a string.</returns>
     public Task<string> GeneratePaymentLinkAsync(decimal amount, string additionalData)
     {
-        string url = $"${_urlImage}/image/{_binCode}-{_accountNumber}-{_templateName}.png?amount={amount:F0}&addInfo={additionalData}";
+        string url = $"${_urlImage}/image/{_binCode}-{_accountNumber}-{_templateName}.jpg?amount={amount:F0}&addInfo={additionalData}&accountName=DO QUOC TUAN";
         return Task.FromResult(url);
     }
 }
