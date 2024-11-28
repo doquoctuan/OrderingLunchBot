@@ -30,7 +30,7 @@ public class GenerateInvoiceFunction(
             var unPaidList = unPaidMap.Select(x => x.Value.Item1).ToHashSet();
             var users = googleSheetContext.Users;
 
-            var tasks = users.Where(x => unPaidList.Contains(x.FullName)).Select(unPaidUser => ProcessUnpaidUser(unPaidUser));
+            var tasks = users.Where(x => unPaidList.Contains(x.FullName)).Select(ProcessUnpaidUser);
 
             logger.LogInformation("Start processing with batching at: {time}", DateTime.Now);
 
@@ -67,5 +67,4 @@ public class GenerateInvoiceFunction(
             await botClient.SendTextMessageAsync(ADMIN_TELEGRAM_ID, $"{unPaidUser.FullName} has not linked their telegram account");
         }
     }
-}
 }
