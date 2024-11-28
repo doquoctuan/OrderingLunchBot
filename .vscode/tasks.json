@@ -69,6 +69,7 @@
 		},
 		{
 			"label": "start functions host",
+			"dependsOn": "build (functions)",
 			"command": "func",
 			"args": [
 				"start"
