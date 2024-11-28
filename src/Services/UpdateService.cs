@@ -303,9 +303,14 @@ namespace OrderLunch.Services
 
             async Task GeneratePaymentLink(ITelegramBotClient botClient, User user, long chatId)
             {
+                int LUNCH_TICKET_PRICE = 30_000;
+                string prefixPayment = "vts_";
                 var totalLunchOrder = await _orderService.GetTotalLunchOrderByUser(user?.FullName);
-                var totalCost = totalLunchOrder * 30_000;
-                var paymentLink = await _paymentService.GeneratePaymentLinkAsync(totalCost, user?.UserName);
+                var totalCost = totalLunchOrder * LUNCH_TICKET_PRICE;
+                var paymentLink = await _paymentService.GeneratePaymentLinkAsync(
+                    amount: totalCost,
+                    additionalData: $"{prefixPayment}{user?.UserName}"
+                );
                 StringBuilder paymentInfoMessage = new();
                 paymentInfoMessage.Append($"<b>Hoá đơn tiền cơm tháng {DateTime.Now.Month - 1}</b>");
                 paymentInfoMessage.Append($"\nHọ tên: <b>{user?.FullName}</b>");
@@ -313,9 +318,9 @@ namespace OrderLunch.Services
                 paymentInfoMessage.Append($"\nTổng tiền: <b>{totalCost.ToString("C", new CultureInfo("vi-VN"))}</b>");
                 paymentInfoMessage.Append($"\nVui lòng quét mã QR để thanh toán");
                 await botClient.SendPhotoAsync(
-                    chatId: chatId, 
-                    photo: InputFile.FromUri(paymentLink), 
-                    parseMode: ParseMode.Html, 
+                    chatId: chatId,
+                    photo: InputFile.FromUri(paymentLink),
+                    parseMode: ParseMode.Html,
                     caption: paymentInfoMessage.ToString()
                 );
             }
