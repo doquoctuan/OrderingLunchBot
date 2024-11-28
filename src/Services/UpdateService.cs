@@ -304,12 +304,12 @@ namespace OrderLunch.Services
             async Task GeneratePaymentLink(ITelegramBotClient botClient, User user, long chatId)
             {
                 int LUNCH_TICKET_PRICE = 30_000;
-                string prefixPayment = "vts_";
+                string prefixPayment = "vts";
                 var totalLunchOrder = await _orderService.GetTotalLunchOrderByUser(user?.FullName);
                 var totalCost = totalLunchOrder * LUNCH_TICKET_PRICE;
                 var paymentLink = await _paymentService.GeneratePaymentLinkAsync(
                     amount: totalCost,
-                    additionalData: $"{prefixPayment}{user?.UserName}"
+                    additionalData: $"{prefixPayment} {user?.UserName}"
                 );
                 StringBuilder paymentInfoMessage = new();
                 paymentInfoMessage.Append($"<b>Hoá đơn tiền cơm tháng {DateTime.Now.Month - 1}</b>");
