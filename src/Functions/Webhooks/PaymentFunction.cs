@@ -62,11 +62,6 @@ public class PaymentFunction(
                         Chat = new() { Id = user.TelegramId.Value, Username = user.UserName }
                     }
                 });
-
-                await botClient.SendTextMessageAsync(
-                    user.TelegramId.Value,
-                    $"Đã xác nhận thanh toán thành công cho <b>{user.FullName}</b>",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
             }
         }
         catch (NullReferenceException ex)
