@@ -86,9 +86,16 @@ public class PaymentFunction(
     /// </returns>
     private async Task<(bool, User)> IsValidPayment(PaymentWebhookDTO paymentDTO)
     {
+        // Extract the string from "vts" to the end of the string
+        var startIndex = paymentDTO.Payment.Content.IndexOf("vts", StringComparison.OrdinalIgnoreCase);
+        if (startIndex == -1)
+        {
+            return (false, null);
+        }
+        var extractedString = paymentDTO.Payment.Content[startIndex..];
         const string PrefixPayment = "vts";
         const int LunchTicketPrice = 30_000;
-        var paymentDetails = paymentDTO.Payment.Content.Split(" ");
+        var paymentDetails = extractedString.Split(" ");
 
         if (paymentDetails.Length <= 1 || !paymentDetails[0].Trim().StartsWith(PrefixPayment, StringComparison.OrdinalIgnoreCase))
         {
