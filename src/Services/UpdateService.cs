@@ -307,7 +307,7 @@ namespace OrderLunch.Services
                 string prefixPayment = "vts";
                 var totalLunchOrder = await _orderService.GetTotalLunchOrderByUser(user?.FullName);
                 var totalCost = totalLunchOrder * LUNCH_TICKET_PRICE;
-                var paymentLink = await _paymentService.GeneratePaymentLinkAsync(
+                var paymentLink = _paymentService.GeneratePaymentLinkAsync(
                     amount: totalCost,
                     additionalData: $"{prefixPayment} {user?.UserName}"
                 );
