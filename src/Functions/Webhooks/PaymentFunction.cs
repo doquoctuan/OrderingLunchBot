@@ -48,9 +48,9 @@ public class PaymentFunction(
 
             if (isValidPayment)
             {
-                if (user!.TelegramId is null or 0)
+                if (user is null || user!.TelegramId is null or 0)
                 {
-                    throw new NullReferenceException(nameof(user.TelegramId));
+                    throw new NullReferenceException($"User not found for payment: {JsonSerializer.Serialize(paymentWebhookDTO)}");
                 }
 
                 // Dispatch event to UpdateService for confirming payment
@@ -71,9 +71,7 @@ public class PaymentFunction(
         }
         catch (NullReferenceException ex)
         {
-            var requestBody = await request.ReadAsStringAsync();
-            logger.LogError(ex, "Cannot find the user who made the payment:\n {RequestBody}", requestBody);
-            await botClient.SendTextMessageAsync(ADMIN_TELEGRAM_ID, $"{ex.Message}\nRequestBody: {requestBody}");
+            await botClient.SendTextMessageAsync(ADMIN_TELEGRAM_ID, $"{ex.Message}");
         }
         catch (Exception ex)
         {
@@ -83,23 +81,34 @@ public class PaymentFunction(
         return new OkResult();
     }
 
+    /// <summary>
+    /// Validates the payment information from the webhook and checks if it matches the user's debt.
+    /// </summary>
+    /// <param name="paymentDTO">The payment data transfer object containing payment details.</param>
+    /// <returns>
+    /// A tuple where the first item is a boolean indicating whether the payment is valid,
+    /// and the second item is the user associated with the payment if valid; otherwise, null.
+    /// </returns>
     private async Task<(bool, User)> IsValidPayment(PaymentWebhookDTO paymentDTO)
     {
-        const string prefixPayment = "vts";
-        const int LUNCH_TICKET_PRICE = 30_000;
-        var additionalInfo = paymentDTO.Payment.Content.Split(" ");
+        const string PrefixPayment = "vts";
+        const int LunchTicketPrice = 30_000;
+        var paymentDetails = paymentDTO.Payment.Content.Split(" ");
 
-        if (additionalInfo.Length <= 1 || !additionalInfo[0].Trim().StartsWith(prefixPayment, StringComparison.OrdinalIgnoreCase))
+        if (paymentDetails.Length <= 1 || !paymentDetails[0].Trim().StartsWith(PrefixPayment, StringComparison.OrdinalIgnoreCase))
         {
             return (false, null);
         }
 
-        var userName = additionalInfo[1].Trim().ToLower();
-        var user = googleSheetContext.Users.FirstOrDefault(x => x.UserName.Equals(userName))
-                   ?? throw new NullReferenceException(nameof(userName));
+        var userName = paymentDetails[1].Trim().ToLower();
+        var user = googleSheetContext.Users.FirstOrDefault(x => x.UserName.Equals(userName));
+        if (user == null)
+        {
+            return (false, null);
+        }
 
-        var totalLunchOrder = await orderService.GetTotalLunchOrderByUser(user.FullName);
-        var debtOfUser = totalLunchOrder * LUNCH_TICKET_PRICE;
-        return (debtOfUser.Equals(paymentDTO.Payment.Amount), user);
+        var totalLunchOrders = await orderService.GetTotalLunchOrderByUser(user.FullName);
+        var userDebt = totalLunchOrders * LunchTicketPrice;
+        return (userDebt == paymentDTO.Payment.Amount, user);
     }
 }
