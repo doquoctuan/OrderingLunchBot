@@ -104,7 +104,7 @@ public class PaymentFunction(
         var user = googleSheetContext.Users.FirstOrDefault(x => x.UserName.Equals(userName));
         if (user == null)
         {
-            return (false, null);
+            return (true, null);
         }
 
         var totalLunchOrders = await orderService.GetTotalLunchOrderByUser(user.FullName);
