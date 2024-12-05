@@ -93,7 +93,7 @@ namespace OrderLunch.Services
                     "search" or "s" or "s@khaykhay_bot" or "search@khaykhay_bot" => SearchHandler(_botClient, _userService, message, text),
                     "list" or "list@khaykhay_bot" => SendList(_botClient, _orderService, message),
                     "debtor" or "debtor@khaykhay_bot" => SendDebtor(_botClient, _orderService, message),
-                    "menu" or "menu@khaykhay_bot" => SendMenu(_botClient, _orderService, message),
+                    "menu" or "menu@khaykhay_bot" => SendMenu(_botClient, _orderService, message, text),
                     "order" or "order@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: true, isAll: false),
                     "unorder" or "unorder@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: false, isAll: false),
                     "orderall" or "orderall@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: true, isAll: true),
@@ -219,9 +219,27 @@ namespace OrderLunch.Services
                 await botClient.SendPhotoAsync(message.Chat.Id, photo: InputFile.FromUri(urlPaymentInfo));
             }
 
-            static async Task SendMenu(ITelegramBotClient botClient, IOrderService _orderService, Message message)
+            static async Task SendMenu(ITelegramBotClient botClient, IOrderService _orderService, Message message, string text)
             {
                 var dateNow = DateTime.Now;
+
+                if (!string.IsNullOrEmpty(text))
+                {
+                    var weekdays = new Dictionary<string, DayOfWeek>
+                    {
+                        { "t2", DayOfWeek.Monday },
+                        { "t3", DayOfWeek.Tuesday },
+                        { "t4", DayOfWeek.Wednesday },
+                        { "t5", DayOfWeek.Thursday },
+                        { "t6", DayOfWeek.Friday }
+                    };
+
+                    if (weekdays.TryGetValue(text.ToLower(), out var dayOfWeek))
+                    {
+                        dateNow = DateTime.Now.AddDays(((int)dayOfWeek - (int)DateTime.Now.DayOfWeek + 7) % 7);
+                    }
+                }
+
                 StringBuilder messageText = new();
                 var menu = await _orderService.GetMenu(dateNow);
 
