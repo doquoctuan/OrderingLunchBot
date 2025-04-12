@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace OrderLunch.Exceptions
+﻿namespace OrderLunch.Exceptions
 {
     public class OrderServiceException : Exception
     {

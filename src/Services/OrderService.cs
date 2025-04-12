@@ -2,19 +2,19 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OrderLunch.ApiClients;
+using OrderLunch.Exceptions;
 using OrderLunch.Interfaces;
 using OrderLunch.Persistence;
-using OrderLunch.Exceptions;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using System.Security.Cryptography;
 using System.Text;
 using Color = SixLabors.ImageSharp.Color;
-using OrderLunch.ApiClients;
-using System.Security.Cryptography;
 
 namespace OrderLunch.Services
 {

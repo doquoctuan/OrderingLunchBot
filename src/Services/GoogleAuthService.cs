@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using OrderLunch;
 using OrderLunch.Helper;
 using OrderLunch.Interfaces;
 using OrderLunch.ResponseModels;

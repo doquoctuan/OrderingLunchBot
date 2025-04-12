@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -8,6 +7,7 @@ using OrderLunch.Interfaces;
 using OrderLunch.Models;
 using OrderLunch.Persistence;
 using OrderLunch.Services;
+using System.Text.Json;
 using Telegram.Bot;
 
 namespace OrderLunch.Functions.Webhooks;

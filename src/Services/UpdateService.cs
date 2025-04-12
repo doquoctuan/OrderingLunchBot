@@ -2,7 +2,6 @@
 using Google.Apis.Sheets.v4.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using OrderLunch.Entities;
 using OrderLunch.Exceptions;
 using OrderLunch.Helper;
 using OrderLunch.Interfaces;

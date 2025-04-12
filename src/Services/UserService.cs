@@ -1,11 +1,6 @@
 ﻿using Dapper;
-using Npgsql;
-using NpgsqlTypes;
-using OrderLunch.Entities;
 using OrderLunch.Interfaces;
 using OrderLunch.Models;
-using OrderLunch.Persistence;
-using System.Data;
 using UTC2_Tool.Context;
 
 namespace OrderLunch.Services

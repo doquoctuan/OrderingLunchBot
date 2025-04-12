@@ -1,5 +1,4 @@
-﻿using OrderLunch.Entities;
-using OrderLunch.Models;
+﻿using OrderLunch.Models;
 
 namespace OrderLunch.Interfaces
 {
