@@ -44,6 +44,7 @@ namespace OrderLunch.Persistence
                     "phongphattrientest@gmail.com",
                     "vts-telebot@vts-tele-bot.iam.gserviceaccount.com",
                     "phongphattriengpmn@gmail.com",
+                    "tuandoquoc28@gmail.com",
                 }
                 },
             };
