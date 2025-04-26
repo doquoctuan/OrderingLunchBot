@@ -270,7 +270,7 @@ namespace OrderLunch.Services
 
                 if (!isValid)
                 {
-                    throw new OrderServiceException("Cannot order lunch today.");
+                    throw new OrderServiceException("Today, do not support registration for lunch");
                 }
 
                 string userName = string.IsNullOrEmpty(text) ? user.UserName : text;
