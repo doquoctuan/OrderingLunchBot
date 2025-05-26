@@ -19,6 +19,7 @@ var githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN", Environment
     ?? throw new ArgumentException("Can not get githubToken. Set GITHUB_TOKEN in environment setting");
 
 var binanceKey = Environment.GetEnvironmentVariable("BinanceApiKey", EnvironmentVariableTarget.Process);
+var whapiKey = Environment.GetEnvironmentVariable("WhapiApiKey", EnvironmentVariableTarget.Process);
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication(workerApplication =>
@@ -79,6 +80,14 @@ var host = new HostBuilder()
             {
                 c.BaseAddress = new Uri("https://binance43.p.rapidapi.com");
                 c.DefaultRequestHeaders.Add("x-rapidapi-key", binanceKey);
+            });
+
+        serviceCollection
+            .AddRefitClient<IWhapiClient>()
+            .ConfigureHttpClient(c =>
+            {
+                c.BaseAddress = new Uri("https://gate.whapi.cloud");
+                c.DefaultRequestHeaders.Add("Authorization", $"Bearer {whapiKey}");
             });
 
         serviceCollection.AddTransient<AuthTokenHandler>();

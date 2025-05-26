@@ -16,6 +16,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
 using User = OrderLunch.Entities.User;
+using IWhapiClient = OrderLunch.ApiClients.IWhapiClient;
 
 namespace OrderLunch.Services
 {
@@ -31,6 +32,7 @@ namespace OrderLunch.Services
         private readonly SpreadsheetsResource.ValuesResource _googleSheetValues;
         private readonly GoogleSheetContext _googleSheetContext;
         private readonly string urlPaymentInfo;
+        private readonly IWhapiClient _whapiClient;
 
         public UpdateService(
             ITelegramBotClient botClient,
@@ -40,7 +42,8 @@ namespace OrderLunch.Services
             GoogleSheetContext googleSheetContext,
             IUserService userService,
             IPaymentService paymentService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IWhapiClient whapiClient)
         {
             _botClient = botClient;
             _logger = logger;
@@ -52,6 +55,7 @@ namespace OrderLunch.Services
             SPREADSHEET_ID = configuration["GoogleSheetDatasource"];
             SHEET_NAME = configuration["GoogleSheetName"];
             urlPaymentInfo = configuration["BASE_IMAGE_PAYMENTINFO"];
+            _whapiClient = whapiClient;
         }
 
         public async Task HandleMessageAsync(Update update)
@@ -90,7 +94,7 @@ namespace OrderLunch.Services
                 var action = command switch
                 {
                     "search" or "s" or "s@khaykhay_bot" or "search@khaykhay_bot" => SearchHandler(_botClient, _userService, message, text),
-                    "list" or "list@khaykhay_bot" => SendList(_botClient, _orderService, message),
+                    "list" or "list@khaykhay_bot" => SendList(_botClient, _orderService, message, _whapiClient),
                     "debtor" or "debtor@khaykhay_bot" => SendDebtor(_botClient, _orderService, message),
                     "menu" or "menu@khaykhay_bot" => SendMenu(_botClient, _orderService, message, text),
                     "order" or "order@khaykhay_bot" => Order(_botClient, _orderService, message, text, user, isOrder: true, isAll: false),
@@ -158,7 +162,7 @@ namespace OrderLunch.Services
                 }
             }
 
-            static async Task SendList(ITelegramBotClient botClient, IOrderService _orderService, Message message)
+            static async Task SendList(ITelegramBotClient botClient, IOrderService _orderService, Message message, IWhapiClient whapiClient)
             {
                 (var response, string assignedMessage, string user19) = await _orderService.CreateOrderListImage(message?.From?.Username ?? "list");
 
@@ -186,7 +190,13 @@ namespace OrderLunch.Services
                 {
                     if (!string.IsNullOrEmpty(assignedMessage))
                     {
-                        await botClient.SendTextMessageAsync(message.Chat.Id, assignedMessage, parseMode: ParseMode.Html);
+                        var sendTextTask = botClient.SendTextMessageAsync(message.Chat.Id, assignedMessage, parseMode: ParseMode.Html);
+                        var sendMediaTask = whapiClient.SendMediaMessages(new ApiClients.SendMediaMsgPayload {
+                            Caption = assignedMessage,
+                            Media = response.First().Item1
+                        });
+
+                        await Task.WhenAll(sendTextTask, sendMediaTask);
                     }
                 }
             }

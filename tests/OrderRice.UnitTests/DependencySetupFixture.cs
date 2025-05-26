@@ -72,6 +72,14 @@ namespace OrderLunch.UnitTests
                      c.DefaultRequestHeaders.Add("x-rapidapi-key", Configuration["BinanceApiKey"]);
                  });
 
+            serviceCollection
+                 .AddRefitClient<IWhapiClient>()
+                 .ConfigureHttpClient(c =>
+                 {
+                     c.BaseAddress = new Uri("https://gate.whapi.cloud");
+                     c.DefaultRequestHeaders.Add("Authorization", $"Bearer {Configuration["WhapiApiKey"]}");
+                 });
+
             serviceCollection.AddTransient<AuthTokenHandler>();
             serviceCollection.Decorate<IGoogleAuthService, CachedGoogleAuthService>();
 
