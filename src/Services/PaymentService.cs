@@ -30,6 +30,7 @@ public class PaymentService : IPaymentService
     /// <returns>A task that represents the asynchronous operation. The task result contains the generated payment link as a string.</returns>
     public string GeneratePaymentLinkAsync(decimal amount, string additionalData)
     {
-        return $"https://api.vietqr.io/image/{_binCode}-{_accountNumber}-{_templateName}.jpg?amount={amount:F0}&addInfo={additionalData}&accountName=${ACCOUNT_NAME}";
+        return Environment.GetEnvironmentVariable("BASE_IMAGE_PAYMENTINFO");
+        // return $"https://api.vietqr.io/image/{_binCode}-{_accountNumber}-{_templateName}.jpg?amount={amount:F0}&addInfo={additionalData}&accountName=${ACCOUNT_NAME}";
     }
 }
