@@ -145,7 +145,7 @@ namespace OrderLunch.Services
 
                 if (!string.IsNullOrEmpty(luckyNumber))
                 {
-                    string messageText = $"Người dùng {user?.FirstName} {user?.FirstName} đã chọn số: ${luckyNumber}";
+                    string messageText = $"Người dùng {user?.FirstName} {user?.LastName} đã chọn số: {luckyNumber}";
                     await botClient.SendTextMessageAsync("-1002047528209", text: messageText);
                 }
             }
@@ -157,7 +157,7 @@ namespace OrderLunch.Services
                 random.GetBytes(randomNumber);
                 int rollNumber = (randomNumber[0] % 100) + 1;
                 var user = message.From;
-                string messageText = $"Con số may mắn của {user?.FirstName} {user?.FirstName}: {rollNumber}";
+                string messageText = $"Con số may mắn của {user?.FirstName} {user?.LastName}: {rollNumber}";
                 await botClient.SendTextMessageAsync(chatId, text: messageText);
             }
 
