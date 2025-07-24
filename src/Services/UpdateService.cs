@@ -104,6 +104,7 @@ namespace OrderLunch.Services
                     "set" or "set@khaykhay_bot" => SetTelegramId(_botClient, _googleSheetValues, user, message.Chat.Id),
                     "confirm" or "confirm@khaykhay_bot" => PaymentConfirmation(_botClient, user, message.Chat.Id),
                     "pay" or "pay@khaykhay_bot" => GeneratePaymentLink(_botClient, user, message.Chat.Id),
+                    "roll" or "roll@khaykhay_bot" => RandomNumber(_botClient, message.Chat.Id),
                     _ => Task.CompletedTask
                 };
 
@@ -121,6 +122,14 @@ namespace OrderLunch.Services
                 };
 
                 await _botClient.SendTextMessageAsync(message.Chat.Id, errorMessage);
+            }
+
+            static async Task RandomNumber(ITelegramBotClient botClient, long chatId)
+            {
+                var random = new Random();
+                int rollNumber = random.Next(1, 100);
+                string messageText = $"Con số may mắn của bạn: {rollNumber}";
+                await botClient.SendTextMessageAsync(chatId, text: messageText);
             }
 
             static async Task SearchHandler(ITelegramBotClient botClient, IUserService userService, Message message, string keyword)
