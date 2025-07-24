@@ -135,7 +135,7 @@ namespace OrderLunch.Services
                 await _redisHandler.WriteToRedis(message.Chat.Id.ToString(), message.Text ?? throw new Exception("You must set a number"));
 
                 string messageText = $"Người dùng {message.Chat.FirstName} {message.Chat.LastName} đã chọn xong 1 con số may mắn.";
-                await botClient.SendTextMessageAsync("-2047528209", text: messageText);
+                await botClient.SendTextMessageAsync("-1002047528209", text: messageText);
             }
 
             static async Task Reveal(ITelegramBotClient botClient, Message message, RedisHandler _redisHandler)
@@ -145,7 +145,7 @@ namespace OrderLunch.Services
                 if (string.IsNullOrEmpty(luckyNumber))
                 {
                     string messageText = $"Người dùng {message.Chat.FirstName} {message.Chat.LastName} đã chọn số: ${luckyNumber}";
-                    await botClient.SendTextMessageAsync("-2047528209", text: messageText);
+                    await botClient.SendTextMessageAsync("-1002047528209", text: messageText);
                 }
             }
 
