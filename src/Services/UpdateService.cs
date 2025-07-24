@@ -9,14 +9,15 @@ using OrderLunch.Persistence;
 using OrderLunch.Validations;
 using System.Data;
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
-using User = OrderLunch.Entities.User;
 using IWhapiClient = OrderLunch.ApiClients.IWhapiClient;
+using User = OrderLunch.Entities.User;
 
 namespace OrderLunch.Services
 {
@@ -33,6 +34,7 @@ namespace OrderLunch.Services
         private readonly GoogleSheetContext _googleSheetContext;
         private readonly string urlPaymentInfo;
         private readonly IWhapiClient _whapiClient;
+        private readonly RedisHandler _redisHandler;
 
         public UpdateService(
             ITelegramBotClient botClient,
@@ -43,7 +45,8 @@ namespace OrderLunch.Services
             IUserService userService,
             IPaymentService paymentService,
             IConfiguration configuration,
-            IWhapiClient whapiClient)
+            IWhapiClient whapiClient,
+            RedisHandler redisHandler)
         {
             _botClient = botClient;
             _logger = logger;
@@ -56,6 +59,7 @@ namespace OrderLunch.Services
             SHEET_NAME = configuration["GoogleSheetName"];
             urlPaymentInfo = configuration["BASE_IMAGE_PAYMENTINFO"];
             _whapiClient = whapiClient;
+            _redisHandler = redisHandler;
         }
 
         public async Task HandleMessageAsync(Update update)
@@ -104,7 +108,9 @@ namespace OrderLunch.Services
                     "set" or "set@khaykhay_bot" => SetTelegramId(_botClient, _googleSheetValues, user, message.Chat.Id),
                     "confirm" or "confirm@khaykhay_bot" => PaymentConfirmation(_botClient, user, message.Chat.Id),
                     "pay" or "pay@khaykhay_bot" => GeneratePaymentLink(_botClient, user, message.Chat.Id),
-                    "roll" or "roll@khaykhay_bot" => RandomNumber(_botClient, message.Chat.Id),
+                    "roll" or "roll@khaykhay_bot" => RandomNumber(_botClient, message.Chat.Id, $"{message.Chat.FirstName} {message.Chat.LastName}"),
+                    "lucky" or "lucky@khaykhay_bot" => SetLuckyNumber(_botClient, message, _redisHandler),
+                    "reveal" or "reveal@khaykhay_bot" => Reveal(_botClient, message, _redisHandler),
                     _ => Task.CompletedTask
                 };
 
@@ -124,11 +130,32 @@ namespace OrderLunch.Services
                 await _botClient.SendTextMessageAsync(message.Chat.Id, errorMessage);
             }
 
-            static async Task RandomNumber(ITelegramBotClient botClient, long chatId)
+            static async Task SetLuckyNumber(ITelegramBotClient botClient, Message message, RedisHandler _redisHandler)
             {
-                var random = new Random();
-                int rollNumber = random.Next(1, 100);
-                string messageText = $"Con số may mắn của bạn: {rollNumber}";
+                await _redisHandler.WriteToRedis(message.Chat.Id.ToString(), message.Text ?? throw new Exception("You must set a number"));
+
+                string messageText = $"Người dùng {message.Chat.FirstName} {message.Chat.LastName} đã chọn xong 1 con số may mắn.";
+                await botClient.SendTextMessageAsync("-2047528209", text: messageText);
+            }
+
+            static async Task Reveal(ITelegramBotClient botClient, Message message, RedisHandler _redisHandler)
+            {
+                var luckyNumber = await _redisHandler.ReadFromRedis(message.Chat.Id.ToString());
+
+                if (string.IsNullOrEmpty(luckyNumber))
+                {
+                    string messageText = $"Người dùng {message.Chat.FirstName} {message.Chat.LastName} đã chọn số: ${luckyNumber}";
+                    await botClient.SendTextMessageAsync("-2047528209", text: messageText);
+                }
+            }
+
+            static async Task RandomNumber(ITelegramBotClient botClient, long chatId, string fullName)
+            {
+                using var random = RandomNumberGenerator.Create();
+                byte[] randomNumber = new byte[1];
+                random.GetBytes(randomNumber);
+                int rollNumber = (randomNumber[0] % 100) + 1;
+                string messageText = $"Con số may mắn của {fullName}: {rollNumber}";
                 await botClient.SendTextMessageAsync(chatId, text: messageText);
             }
 

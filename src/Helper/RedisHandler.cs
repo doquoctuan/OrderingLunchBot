@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Azure.Core;
+using Microsoft.Extensions.Configuration;
 using StackExchange.Redis;
 
 namespace OrderLunch.Helper
@@ -25,6 +26,21 @@ namespace OrderLunch.Helper
             var cache = _connectionHelper.Connection.GetDatabase();
             var expirationTime = TimeSpan.FromSeconds(expiredTime - 100);
             return await cache.StringSetAsync(key, accessToken, expirationTime);
+        }
+
+        public async Task<bool> WriteToRedis(string keyName, string value)
+        {
+            RedisKey key = new(keyName);
+            var cache = _connectionHelper.Connection.GetDatabase();
+            var expirationTime = TimeSpan.FromHours(2);
+            return await cache.StringSetAsync(key, value, expirationTime);
+        }
+
+        public async Task<string> ReadFromRedis(string keyName)
+        {
+            RedisKey key = new(keyName);
+            var cache = _connectionHelper.Connection.GetDatabase();
+            return await cache.StringGetAsync(key);
         }
     }
 }
