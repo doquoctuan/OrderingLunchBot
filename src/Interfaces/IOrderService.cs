@@ -12,5 +12,6 @@
         Task<(bool, int)> OrderTicket();
         Task<string> GenerateMessageTakeTicket(List<string> users);
         Task<int> GetTotalLunchOrderByUser(string userName);
+        Task ClearBlacklist();
     }
 }

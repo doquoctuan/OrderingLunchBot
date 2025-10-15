@@ -105,5 +105,19 @@ namespace OrderLunch.Functions
             };
             await _updateService.HandleMessageAsync(update);
         }
+
+        [Function(nameof(AutoClearBlacklistMonthly))]
+        public async Task AutoClearBlacklistMonthly([TimerTrigger("0 0 0 1 * *")] TimerInfo timerInfo, FunctionContext context)
+        {
+            try
+            {
+                await _orderService.ClearBlacklist();
+                _logger.LogInformation("Blacklist cleared successfully at the beginning of the month");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error clearing blacklist: {Message}", ex.Message);
+            }
+        }
     }
 }
