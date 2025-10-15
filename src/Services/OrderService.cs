@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OrderLunch.ApiClients;
 using OrderLunch.Exceptions;
+using OrderLunch.Helper;
 using OrderLunch.Interfaces;
 using OrderLunch.Persistence;
 using SixLabors.Fonts;
@@ -25,6 +26,7 @@ namespace OrderLunch.Services
         private readonly GoogleSheetContext _googleSheetContext;
         private readonly ILogger<OrderService> _logger;
         private readonly IBinanceApiClient _binanceApiClient;
+        private readonly RedisHandler _redisHandler;
         private readonly string spreadSheetId;
         private readonly string centralSpreadSheetId;
         private readonly string BASE_IMAGE_URL;
@@ -38,7 +40,8 @@ namespace OrderLunch.Services
             GithubService githubService,
             GoogleSheetContext googleSheetContext,
             ILogger<OrderService> logger,
-            IBinanceApiClient binanceApiClient)
+            IBinanceApiClient binanceApiClient,
+            RedisHandler redisHandler)
         {
             _httpGoogleClient = httpClientFactory.CreateClient("google_sheet_client");
             _githubService = githubService;
@@ -49,6 +52,7 @@ namespace OrderLunch.Services
             BASE_IMAGE_UNPAID_URL = configuration["BASE_IMAGE_UNPAID"];
             _googleSheetContext = googleSheetContext;
             _binanceApiClient = binanceApiClient;
+            _redisHandler = redisHandler;
         }
 
         private async Task<string> FindSheetId(DateTime dateTime, string spearchSheet = null)
@@ -153,6 +157,17 @@ namespace OrderLunch.Services
         private async Task<(List<(string, string)>, string, string)> ProcessCreateImage(List<List<string>> datas, int indexCurrentDate, Image<Rgba32> baseImage, string folderName = "list")
         {
             var blackListUsers = _googleSheetContext.Users.Where(x => x.IsBlacklist == true).Select(x => x.FullName).ToList();
+            
+            // Get Redis blacklist
+            HashSet<string> redisBlacklist = new();
+            try
+            {
+                redisBlacklist = await _redisHandler.GetBlacklist();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error getting Redis blacklist: {Message}", ex.Message);
+            }
 
             bool IsContain(List<string> blackListUsers, string name)
             {
@@ -166,9 +181,21 @@ namespace OrderLunch.Services
                 return false;
             }
 
+            bool IsInRedisBlacklist(string name)
+            {
+                foreach (var blacklistedUser in redisBlacklist)
+                {
+                    if (name.Contains(blacklistedUser, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             void AddList(List<string> floor16, List<string> floor19, string name)
             {
-                if (IsContain(blackListUsers, name) || name.Contains("OS") || name.Contains("TTS"))
+                if (IsContain(blackListUsers, name) || IsInRedisBlacklist(name) || name.Contains("OS") || name.Contains("TTS"))
                 {
                     return;
                 }
@@ -247,8 +274,22 @@ namespace OrderLunch.Services
             // Random user pick ticket for lunch
             Random random = new();
             int randomIndexFloor19 = random.Next(0, floor19.Count);
+            string floor19User = floor19.Count > 0 ? floor19[randomIndexFloor19] : string.Empty;
+            
+            // Add floor19 user to blacklist
+            if (!string.IsNullOrEmpty(floor19User))
+            {
+                try
+                {
+                    await _redisHandler.AddToBlacklist(floor19User);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("Error adding floor19 user to blacklist: {Message}", ex.Message);
+                }
+            }
 
-            return new(listRegister, floor16.Count > 0 ? await GenerateMessageTakeTicket(floor16) : string.Empty, floor19.Count > 0 ? floor19[randomIndexFloor19] : string.Empty);
+            return new(listRegister, floor16.Count > 0 ? await GenerateMessageTakeTicket(floor16) : string.Empty, floor19User);
         }
 
         public async Task<string> GenerateMessageTakeTicket(List<string> users)
@@ -267,7 +308,19 @@ namespace OrderLunch.Services
             message.Append(symbolPrice.Price.ToString("F"));
             message.Append(" USDT");
             int randomIndex = GetRandomIndex(users.Count);
-            message.AppendLine($"\nKính mời đồng chí {users[randomIndex >= 0 ? randomIndex : 0]} ");
+            var selectedUser = users[randomIndex >= 0 ? randomIndex : 0];
+            
+            // Add selected user to blacklist
+            try
+            {
+                await _redisHandler.AddToBlacklist(selectedUser);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error adding user to blacklist: {Message}", ex.Message);
+            }
+            
+            message.AppendLine($"\nKính mời đồng chí {selectedUser} ");
             message.Append("lấy phiếu ăn ngày hôm nay.");
             return message.ToString();
         }
@@ -604,6 +657,11 @@ namespace OrderLunch.Services
             }
 
             throw new OrderServiceException(ErrorMessages.USER_DOES_NOT_EXIST);
+        }
+
+        public async Task ClearBlacklist()
+        {
+            await _redisHandler.ClearBlacklist();
         }
     }
 }

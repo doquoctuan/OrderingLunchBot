@@ -42,5 +42,27 @@ namespace OrderLunch.Helper
             var cache = _connectionHelper.Connection.GetDatabase();
             return await cache.StringGetAsync(key);
         }
+
+        public async Task<bool> AddToBlacklist(string userName)
+        {
+            var blacklistKey = $"blacklist:{DateTime.Now:yyyy-MM}";
+            var cache = _connectionHelper.Connection.GetDatabase();
+            return await cache.SetAddAsync(blacklistKey, userName);
+        }
+
+        public async Task<HashSet<string>> GetBlacklist()
+        {
+            var blacklistKey = $"blacklist:{DateTime.Now:yyyy-MM}";
+            var cache = _connectionHelper.Connection.GetDatabase();
+            var values = await cache.SetMembersAsync(blacklistKey);
+            return values.Select(v => v.ToString()).ToHashSet();
+        }
+
+        public async Task<bool> ClearBlacklist()
+        {
+            var blacklistKey = $"blacklist:{DateTime.Now:yyyy-MM}";
+            var cache = _connectionHelper.Connection.GetDatabase();
+            return await cache.KeyDeleteAsync(blacklistKey);
+        }
     }
 }
